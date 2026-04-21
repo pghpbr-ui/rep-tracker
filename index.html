@@ -1216,7 +1216,7 @@ function renderProgress() {
     el.innerHTML = `
       <div class="app-header">
         <div class="app-name">PROGRESS</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">// no data yet</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">// no data yet · v${APP_VERSION}</div>
       </div>
       <div class="empty-state" style="margin-bottom:20px">
         <div class="es-icon">📈</div>
@@ -1244,7 +1244,7 @@ function renderProgress() {
     <div class="app-header">
       <div class="app-header-top">
         <div class="app-name">PROGRESS</div>
-        <div class="app-meta">n=${S.history.length}</div>
+        <div class="app-meta">n=${S.history.length} · v${APP_VERSION}</div>
       </div>
       <div style="font-size:10px;color:var(--muted)">// AMRAP set 5 performance</div>
     </div>
