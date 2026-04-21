@@ -434,7 +434,7 @@
 <script>
 'use strict';
 
-const APP_VERSION = '20260421b';
+const APP_VERSION = '20260421c';
 
 // ══════════════════════════════════════════════
 // STATE
@@ -1373,6 +1373,10 @@ function doAppUpdate() {
 // ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/rep-tracker/sw.js');
+}
+
 checkVersion();
 const _savedUser = localStorage.getItem('rt3_user');
 if (_savedUser) setUser(_savedUser);
