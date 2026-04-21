@@ -777,6 +777,21 @@ function skipRest() {
   advanceSet();
 }
 
+function adjustRestTime(delta) {
+  const newSecs = Math.max(10, Math.min(300, S.settings.restSecs + delta));
+  const diff    = newSecs - S.settings.restSecs;
+  S.settings.restSecs = newSecs;
+  wk.restLeft = Math.max(1, wk.restLeft + diff);
+  save();
+  const countdown = document.getElementById('rest-countdown');
+  if (countdown) {
+    countdown.textContent = wk.restLeft;
+    countdown.classList.toggle('ending', wk.restLeft <= 10);
+  }
+  const durEl = document.getElementById('rest-duration-val');
+  if (durEl) durEl.textContent = newSecs + 's';
+}
+
 function advanceSet() {
   wk.setIdx++;
   wk.phase = 'active';
@@ -921,11 +936,18 @@ function renderWkRest(page) {
       </div>
     </div>
     <div class="rest-hero">
-      <div class="rest-num" id="rest-countdown">${wk.restLeft}</div>
+      <div class="rest-num ${wk.restLeft <= 10 ? 'ending' : ''}" id="rest-countdown">${wk.restLeft}</div>
       <div class="rest-sub">seconds</div>
       <div class="rest-next">
         up next &nbsp;·&nbsp; set ${nextIdx+1}
         &nbsp;·&nbsp; <b>${isNextAmrap ? 'AMRAP' : nextTarget + ' reps'}</b>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:24px">
+        <button class="sc-btn" onclick="adjustRestTime(-15)" style="width:44px;height:44px;font-size:13px;font-weight:700">−15</button>
+        <div style="font-size:11px;color:var(--muted);text-align:center;min-width:60px">
+          default<br><span id="rest-duration-val" style="color:var(--text);font-weight:700">${S.settings.restSecs}s</span>
+        </div>
+        <button class="sc-btn" onclick="adjustRestTime(+15)" style="width:44px;height:44px;font-size:13px;font-weight:700">+15</button>
       </div>
       <button class="btn btn-ghost" style="max-width:200px" onclick="skipRest()">[ skip rest → ]</button>
     </div>
@@ -1060,8 +1082,8 @@ function renderHome() {
     dayBadge = `<div class="rest-day-badge">rest day · next: ${days_en[nxt.getDay()]}</div>`;
   }
 
-  function setsMini(ex, color) {
-    return S[ex].sets.map((r,i) =>
+  function setsMini(exData, color) {
+    return exData.sets.map((r,i) =>
       i===4 ? `<span style="color:${color};font-weight:800">${r}*</span>` : `<span>${r}</span>`
     ).join(' · ');
   }
