@@ -378,7 +378,7 @@
       TM = 0.90 × max &nbsp;·&nbsp; 9 sets per exercise<br>
       Sets: 55/60/65/70/75/70/65/60/55% of TM<br>
       Set 5 = AMRAP · progression based on result<br>
-      Schedule: Monday · Wednesday · Friday
+      Schedule: 3 days per week
     </div>
     <button class="btn btn-primary" onclick="saveSetup()">[ INITIALIZE → ]</button>
   </div>
@@ -403,6 +403,9 @@
 
 <!-- SAVE TOAST -->
 <div class="save-toast" id="saveToast">● auto-saved</div>
+
+<!-- UPDATE BANNER -->
+<div id="updateBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:500;background:var(--green);color:#000;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.1em;text-align:center;padding:10px;cursor:pointer;text-transform:uppercase" onclick="doAppUpdate()">[ new version available — tap to update ]</div>
 
 <!-- IMPORT FILE INPUT (hidden) -->
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
@@ -430,6 +433,8 @@
 
 <script>
 'use strict';
+
+const APP_VERSION = '20260421';
 
 // ══════════════════════════════════════════════
 // STATE
@@ -1347,8 +1352,28 @@ function nav(page) {
 }
 
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// VERSION / UPDATE CHECK
+// ══════════════════════════════════════════════
+function checkVersion() {
+  const stored = localStorage.getItem('rt3_appVersion');
+  if (stored && stored !== APP_VERSION) {
+    document.getElementById('updateBanner').style.display = 'block';
+  } else {
+    localStorage.setItem('rt3_appVersion', APP_VERSION);
+  }
+}
+
+function doAppUpdate() {
+  localStorage.setItem('rt3_appVersion', APP_VERSION);
+  const url = location.pathname + '?v=' + APP_VERSION;
+  location.href = url;
+}
+
+// ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
+checkVersion();
 const _savedUser = localStorage.getItem('rt3_user');
 if (_savedUser) setUser(_savedUser);
 else { renderLoginOv(); document.getElementById('loginOv').classList.remove('hidden'); }
