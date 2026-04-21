@@ -16,18 +16,18 @@
 
     :root {
       --bg:       #0D0D0D;
-      --s1:       #111111;   /* card surface */
-      --s2:       #161616;   /* nested surface */
-      --b1:       #1C1C1C;   /* border */
-      --b2:       #282828;   /* border bright */
-      --text:     #D7D9DB;   /* light gray */
+      --s1:       #111111;
+      --s2:       #161616;
+      --b1:       #1C1C1C;
+      --b2:       #282828;
+      --text:     #D7D9DB;
       --muted:    #505050;
       --muted2:   #2A2A2A;
-      --orange:   #CE202E;   /* red — push-ups + primary accent */
-      --blue:     #7B8FD8;   /* lightened navy — squats */
+      --orange:   #CE202E;
+      --blue:     #7B8FD8;
       --green:    #4ADE80;
       --red:      #CE202E;
-      --accent:   #D7D9DB;   /* light gray occasional accent */
+      --accent:   #D7D9DB;
       --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', ui-monospace, monospace;
     }
 
@@ -42,7 +42,6 @@
       font-size: 14px;
     }
 
-    /* ── CURSOR BLINK ── */
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
     .cursor {
       display: inline-block; width: 9px; height: 1.05em;
@@ -116,7 +115,7 @@
       border-left: 2px solid var(--b2); padding-left: 10px; margin: 20px 0;
     }
 
-    /* ── COMMON ELEMENTS ── */
+    /* ── COMMON ── */
     .divider { height: 1px; background: var(--b1); margin: 16px 0; }
     .section-head {
       font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
@@ -138,6 +137,7 @@
     .btn-primary { background: var(--orange); border-color: var(--orange); color: #000; }
     .btn-ghost   { border-color: var(--b2); color: var(--muted); }
     .btn-ghost:hover, .btn-ghost:active { border-color: var(--b2); color: var(--text); }
+    .btn-red { background: var(--red); border-color: var(--red); color: #000; font-weight: 800; }
 
     /* ── HOME ── */
     .app-header { padding-top: 8px; margin-bottom: 24px; }
@@ -156,36 +156,44 @@
     .stat-num { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 3px; }
     .stat-key { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
 
-    .week-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    /* ── MWF GRID ── */
+    .mwf-grid {
+      display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px;
       margin-bottom: 4px;
     }
-    .wg-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-    .wg-day { font-size: 9px; color: var(--muted); text-transform: uppercase; }
-    .wg-dot {
-      width: 100%; aspect-ratio: 1; max-width: 34px;
+    .mwg-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .mwg-day { font-size: 8px; color: var(--muted); text-transform: uppercase; }
+    .mwg-dot {
+      width: 100%; aspect-ratio: 1;
       border: 1px solid var(--b2);
       display: flex; align-items: center; justify-content: center;
-      font-size: 10px; color: var(--muted); font-weight: 700;
+      font-size: 9px; color: var(--muted); font-weight: 700;
       transition: all .2s;
     }
-    .wg-dot.hit   { background: var(--orange); border-color: var(--orange); color: #000; }
-    .wg-dot.today { border-color: var(--muted); }
+    .mwg-dot.hit   { background: var(--orange); border-color: var(--orange); color: #000; }
+    .mwg-dot.today { border-color: var(--muted); }
+    .mwg-dot.rest  { border-color: transparent; background: transparent; opacity: 0.2; }
 
+    /* ── TARGET / INFO GRID ── */
     .target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--b1); margin-bottom: 20px; }
     .target-cell {
-      background: var(--s1); padding: 18px 16px;
+      background: var(--s1); padding: 16px 14px;
       display: flex; flex-direction: column;
     }
     .tc-label {
       font-size: 9px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.15em; margin-bottom: 10px;
+      letter-spacing: 0.15em; margin-bottom: 8px;
     }
     .tc-num {
-      font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1;
-      margin-bottom: 6px;
+      font-size: 42px; font-weight: 800; letter-spacing: -2px; line-height: 1;
+      margin-bottom: 4px;
     }
     .tc-sub { font-size: 10px; color: var(--muted); }
+    .tc-sets-mini {
+      margin-top: 8px; font-size: 9px; color: var(--muted);
+      line-height: 1.7; border-top: 1px solid var(--b1); padding-top: 8px;
+    }
+    .tc-sets-mini span { color: var(--text); font-weight: 600; }
 
     .logged-flag {
       display: inline-flex; align-items: center; gap: 6px;
@@ -194,29 +202,66 @@
     }
     .logged-flag::before { content: '✓'; }
 
-    /* ── WORKOUT ── */
-    .ex-block { border: 1px solid var(--b1); padding: 18px 16px; margin-bottom: 10px; }
+    .workout-day-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--orange); margin-bottom: 14px;
+    }
+    .rest-day-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+    }
+
+    /* ── WORKOUT — 9-SET UI ── */
+    .ex-block { border: 1px solid var(--b1); margin-bottom: 10px; overflow: hidden; }
     .ex-block-head {
       display: flex; align-items: baseline; justify-content: space-between;
-      margin-bottom: 16px;
+      padding: 14px 16px 0; margin-bottom: 10px;
     }
     .ex-block-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; }
-    .ex-block-target { font-size: 10px; color: var(--muted); }
-    .ex-block-target span { color: var(--text); font-weight: 700; }
-    .num-row { display: flex; align-items: center; justify-content: center; gap: 20px; }
-    .ni-btn {
-      width: 52px; height: 52px; border: 1px solid var(--b2);
+    .ex-block-meta { font-size: 10px; color: var(--muted); }
+    .ex-block-meta span { color: var(--text); font-weight: 700; }
+
+    .set-row {
+      display: flex; align-items: center;
+      padding: 7px 16px; border-top: 1px solid var(--b1);
+      gap: 10px;
+    }
+    .set-row.amrap-row {
+      background: rgba(206,32,46,0.06);
+      border-top-color: var(--b2);
+      padding: 10px 16px;
+    }
+    .set-num {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      min-width: 28px; letter-spacing: 0.06em;
+    }
+    .amrap-row .set-num { color: var(--orange); }
+    .set-target {
+      font-size: 11px; color: var(--muted);
+      flex: 1;
+    }
+    .amrap-row .set-target { color: var(--orange); font-weight: 600; }
+    .set-target b { color: var(--text); font-weight: 700; }
+    .set-controls {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sc-btn {
+      width: 30px; height: 30px; border: 1px solid var(--b2);
       background: var(--s2); color: var(--text);
-      font-family: var(--mono); font-size: 22px; font-weight: 500;
+      font-family: var(--mono); font-size: 16px; font-weight: 500;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       transition: all .1s; -webkit-tap-highlight-color: transparent;
       flex-shrink: 0;
     }
-    .ni-btn:active { background: var(--b2); transform: scale(0.91); }
-    .ni-val {
-      font-size: 68px; font-weight: 800; letter-spacing: -3px;
-      min-width: 110px; text-align: center; line-height: 1;
+    .amrap-row .sc-btn { width: 38px; height: 38px; font-size: 20px; }
+    .sc-btn:active { background: var(--b2); transform: scale(0.88); }
+    .sc-val {
+      font-size: 16px; font-weight: 800;
+      min-width: 32px; text-align: center; line-height: 1;
     }
+    .amrap-row .sc-val { font-size: 26px; min-width: 44px; color: var(--orange); }
 
     /* ── RESULT ── */
     .result-block { border: 1px solid var(--b1); padding: 0; margin-bottom: 10px; overflow: hidden; }
@@ -238,15 +283,16 @@
     .next-block { background: var(--s1); border: 1px solid var(--b1); padding: 16px; margin-bottom: 14px; }
     .next-label {
       font-size: 9px; font-weight: 700; color: var(--orange);
-      text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 10px;
     }
-    .next-row {
-      display: flex; align-items: baseline; justify-content: space-between;
-      padding: 5px 0; border-bottom: 1px solid var(--b1);
+    .next-sets-row {
+      display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;
     }
-    .next-row:last-child { border-bottom: none; }
-    .next-row-key { font-size: 11px; color: var(--muted); }
-    .next-row-val { font-size: 22px; font-weight: 800; }
+    .ns-pill {
+      font-size: 11px; font-weight: 700; padding: 3px 7px;
+      background: var(--s2); border: 1px solid var(--b2); color: var(--text);
+    }
+    .ns-pill.amrap { border-color: var(--orange); color: var(--orange); }
 
     /* ── CHARTS ── */
     .chart-block { border: 1px solid var(--b1); padding: 16px 14px; margin-bottom: 10px; }
@@ -260,7 +306,7 @@
     .leg-line { width: 12px; height: 2px; }
     .leg-dash { width: 12px; height: 0; border-top: 2px dashed var(--b2); }
 
-    /* ── FORMULA TABLE ── */
+    /* ── FORMULA / PROGRAM STATE ── */
     .formula-block { border: 1px solid var(--b1); margin-bottom: 10px; overflow: hidden; }
     .formula-head {
       background: var(--s1); padding: 10px 14px;
@@ -274,6 +320,22 @@
     .formula-row:last-child { border-bottom: none; }
     .fr-key { color: var(--muted); flex: 1; }
     .fr-val { font-weight: 700; font-size: 14px; }
+
+    /* ── SETTINGS ROW ── */
+    .settings-row {
+      display: flex; align-items: center; padding: 12px 14px;
+      border-bottom: 1px solid var(--b1); font-size: 11px;
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .sr-key { color: var(--muted); flex: 1; font-size: 11px; }
+    .sr-input {
+      width: 72px; padding: 6px 8px;
+      background: var(--s2); border: 1px solid var(--b2);
+      color: var(--text); font-family: var(--mono); font-size: 14px;
+      font-weight: 700; text-align: center; outline: none;
+      transition: border-color .15s;
+    }
+    .sr-input:focus { border-color: var(--orange); }
 
     /* ── PROGRESS STATS ── */
     .prog-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--b1); margin-bottom: 10px; }
@@ -312,7 +374,6 @@
       border-left: 2px solid var(--b2); padding-left: 12px; margin-bottom: 22px;
     }
     .modal-body strong { color: var(--text); }
-    .btn-red { background: var(--red); border-color: var(--red); color: #000; font-weight: 800; }
 
     /* ── SAVE TOAST ── */
     @keyframes fadeUp { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
@@ -373,9 +434,9 @@
 <!-- SETUP OVERLAY -->
 <div class="setup-ov" id="setupOv">
   <div class="setup-inner">
-    <div class="setup-logo">// rep-tracker v2.0</div>
+    <div class="setup-logo">// barestrength</div>
     <div class="setup-title">Initial Setup</div>
-    <div class="setup-desc">Enter your max reps in one unbroken set.<br>Targets adapt daily from here.</div>
+    <div class="setup-desc">Enter your max reps in one unbroken set.<br>nSuns-style 9-set program, MWF schedule.</div>
 
     <div class="setup-field">
       <div class="setup-label">
@@ -394,8 +455,10 @@
     </div>
 
     <div class="setup-note">
-      D₀ = 0.30 × M &nbsp;·&nbsp; α = 0.4 &nbsp;·&nbsp; r = 0.10<br>
-      D_{n+1} = Dₙ + 0.10·M + 0.5·(Aₙ − Dₙ)
+      TM = 0.90 × max &nbsp;·&nbsp; 9 sets per exercise<br>
+      Sets: 55/60/65/70/75/70/65/60/55% of TM<br>
+      Set 5 = AMRAP · progression based on result<br>
+      Schedule: Monday · Wednesday · Friday
     </div>
 
     <button class="btn btn-primary" onclick="saveSetup()">[ INITIALIZE → ]</button>
@@ -409,7 +472,7 @@
     <div class="modal-body">
       This will permanently delete:<br>
       · <strong id="resetCount">0</strong> workout sessions<br>
-      · all formula state (M, D, n)<br>
+      · all program state (TM, sets, n)<br>
       · your entire streak &amp; history<br><br>
       This <strong>cannot be undone</strong>.<br>
       Export a backup first if needed.
@@ -448,6 +511,7 @@
 
 <script>
 'use strict';
+
 // ══════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════
@@ -463,16 +527,41 @@ function getStoredUsers() {
   return users.sort();
 }
 
-let S = {
-  pu: { M: 30,  D: 9,   n: 0 },   // push-ups: max, target (float), sessions
-  sq: { M: 40,  D: 12,  n: 0 },   // squats
-  history: [],                       // [{date, pu:{actual,target,M}, sq:{actual,target,M}}]
-  initialized: false,
-};
+const NSUNS_PCTS = [0.55, 0.60, 0.65, 0.70, 0.75, 0.70, 0.65, 0.60, 0.55];
+
+function initSets(M) {
+  const TM = Math.max(1, Math.round(M * 0.9));
+  return { TM, sets: NSUNS_PCTS.map(p => Math.max(1, Math.round(p * TM))) };
+}
+
+function defaultState() {
+  return {
+    pu: { M: 30, TM: 27, sets: [15,16,18,21,20,21,18,16,15], n: 0 },
+    sq: { M: 40, TM: 36, sets: [20,22,23,25,27,25,23,22,20], n: 0 },
+    settings: { repCap: 35 },
+    history: [],
+    initialized: false,
+  };
+}
+
+let S = defaultState();
 
 function load() {
-  try { const s = localStorage.getItem(getStorageKey()); if (s) S = JSON.parse(s); } catch(e) {}
+  try {
+    const s = localStorage.getItem(getStorageKey());
+    if (s) S = JSON.parse(s);
+    // migrate old format (D/n only, no sets)
+    if (S.initialized && !Array.isArray(S.pu.sets)) {
+      const puI = initSets(S.pu.M || 30);
+      const sqI = initSets(S.sq.M || 40);
+      S.pu = { M: S.pu.M || 30, TM: puI.TM, sets: puI.sets, n: S.pu.n || 0 };
+      S.sq = { M: S.sq.M || 40, TM: sqI.TM, sets: sqI.sets, n: S.sq.n || 0 };
+      S.settings = { repCap: 35 };
+    }
+    if (!S.settings) S.settings = { repCap: 35 };
+  } catch(e) {}
 }
+
 let _saveToastTimer = null;
 function save() {
   localStorage.setItem(getStorageKey(), JSON.stringify(S));
@@ -483,16 +572,22 @@ function save() {
 }
 
 // ══════════════════════════════════════════════
-// ADAPTIVE FORMULA
-// D_{n+1} = Dₙ + 0.10·M + 0.5·(Aₙ − Dₙ)
-// Exceeded:  M  ← M + 0.4·(Aₙ − Dₙ)
-// Curve:     Dₙ = M·(1 − e^{−0.10·n})
+// nSUNS PROGRESSION
 // ══════════════════════════════════════════════
-function applyFormula(ex, actual) {
-  const gap   = actual - ex.D;
-  const M_new = actual > ex.D ? ex.M + 0.4 * gap : ex.M;
-  const D_new = ex.D + 0.10 * M_new + 0.5 * gap;
-  return { M: Math.max(M_new, 1), D: Math.max(1, D_new), n: ex.n + 1 };
+function progressSets(ex, amrap) {
+  let inc = 0;
+  if (amrap <= 30)      inc = 0;
+  else if (amrap <= 34) inc = 2;
+  else if (amrap <= 38) inc = 3;
+  else                  inc = 5;
+
+  if (inc === 0) return { ...ex, n: ex.n + 1 };
+
+  const cap = (S.settings && S.settings.repCap) ? S.settings.repCap : 35;
+  const sets = ex.sets.map((r, i) =>
+    i === 4 ? r + inc : Math.min(r + inc, cap)
+  );
+  return { ...ex, TM: ex.TM + inc, sets, n: ex.n + 1 };
 }
 
 // ══════════════════════════════════════════════
@@ -501,32 +596,53 @@ function applyFormula(ex, actual) {
 const rnd    = v  => Math.max(1, Math.round(v));
 const todayS = () => new Date().toDateString();
 
+const MWF = new Set([1, 3, 5]); // Mon, Wed, Fri
+
+function isWorkoutDay(date) {
+  return MWF.has(date.getDay());
+}
+
 function loggedToday() {
   return S.history.length > 0 &&
     new Date(S.history[S.history.length - 1].date).toDateString() === todayS();
 }
 
-function weekDays() {
+// Returns last 9 MWF dates (most recent last)
+function mwfDays() {
   const today = new Date();
-  const LABELS = ['M','T','W','T','F','S','S'];
-  return Array.from({length:7}, (_,i) => {
-    const d = new Date(today); d.setDate(today.getDate() - (6 - i));
-    const dow = d.getDay();
-    return {
-      label:   LABELS[dow === 0 ? 6 : dow - 1],
-      hit:     S.history.some(h => new Date(h.date).toDateString() === d.toDateString()),
-      isToday: d.toDateString() === today.toDateString(),
-    };
-  });
+  const days = [];
+  const d = new Date(today);
+  d.setHours(12, 0, 0, 0);
+  while (days.length < 9) {
+    if (MWF.has(d.getDay())) {
+      days.unshift({
+        label: ['M','W','F'][[1,3,5].indexOf(d.getDay())],
+        dateStr: d.toDateString(),
+        hit: S.history.some(h => new Date(h.date).toDateString() === d.toDateString()),
+        isToday: d.toDateString() === today.toDateString(),
+      });
+    }
+    d.setDate(d.getDate() - 1);
+  }
+  return days;
 }
 
 function streak() {
   const today = new Date();
   let n = 0;
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(today); d.setDate(today.getDate() - i);
-    if (S.history.some(h => new Date(h.date).toDateString() === d.toDateString())) n++;
-    else break;
+  const d = new Date(today);
+  d.setHours(12, 0, 0, 0);
+  for (let i = 0; i < 500; i++) {
+    if (MWF.has(d.getDay())) {
+      const isToday = d.toDateString() === today.toDateString();
+      const logged  = S.history.some(h => new Date(h.date).toDateString() === d.toDateString());
+      if (logged) {
+        n++;
+      } else if (!isToday) {
+        break;
+      }
+    }
+    d.setDate(d.getDate() - 1);
   }
   return n;
 }
@@ -537,7 +653,7 @@ function fmtShort(iso) {
 }
 
 // ══════════════════════════════════════════════
-// DATA MANAGEMENT — export / import / reset
+// DATA MANAGEMENT
 // ══════════════════════════════════════════════
 function exportData() {
   const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
@@ -545,7 +661,7 @@ function exportData() {
   const a    = document.createElement('a');
   const date = new Date().toISOString().slice(0,10);
   a.href     = url;
-  a.download = `rep-tracker-backup-${date}.json`;
+  a.download = `barestrength-backup-${date}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -557,18 +673,18 @@ function importData(event) {
   reader.onload = e => {
     try {
       const parsed = JSON.parse(e.target.result);
-      // Basic validation
       if (!parsed.pu || !parsed.sq || !Array.isArray(parsed.history)) {
         alert('Invalid backup file.');
         return;
       }
       S = parsed;
+      if (!S.settings) S.settings = { repCap: 35 };
       save();
       event.target.value = '';
       nav('home');
       alert(`✓ Imported ${S.history.length} sessions successfully.`);
     } catch {
-      alert('Could not read backup file. Make sure it\'s a valid Rep Tracker JSON export.');
+      alert('Could not read backup file.');
     }
   };
   reader.readAsText(file);
@@ -584,15 +700,19 @@ function closeModal() {
 }
 
 function doReset() {
-  S = {
-    pu: { M: 30, D: 9,  n: 0 },
-    sq: { M: 40, D: 12, n: 0 },
-    history: [],
-    initialized: false,
-  };
+  S = defaultState();
   localStorage.removeItem(getStorageKey());
   closeModal();
   document.getElementById('setupOv').classList.remove('hidden');
+}
+
+function saveRepCap() {
+  const el = document.getElementById('repCapInput');
+  if (!el) return;
+  const v = Math.max(1, Math.min(100, parseInt(el.value) || 35));
+  el.value = v;
+  S.settings.repCap = v;
+  save();
 }
 
 // ══════════════════════════════════════════════
@@ -617,7 +737,7 @@ function renderLoginOv() {
       <div class="divider-or">or new user</div>`;
   }
   document.getElementById('loginInner').innerHTML = `
-    <div class="setup-logo">// rep-tracker v2.0</div>
+    <div class="setup-logo">// barestrength</div>
     <div class="setup-title">Sign In<span class="cursor"></span></div>
     <div class="setup-desc">Data stays on this device.<br>No password needed.</div>
     ${existingHTML}
@@ -644,7 +764,7 @@ function loginSubmit() {
 function setUser(name) {
   currentUser = name;
   localStorage.setItem('rt3_user', name);
-  S = { pu:{M:30,D:9,n:0}, sq:{M:40,D:12,n:0}, history:[], initialized:false };
+  S = defaultState();
   load();
   document.getElementById('loginOv').classList.add('hidden');
   if (!S.initialized) {
@@ -657,7 +777,7 @@ function setUser(name) {
 
 function switchUser() {
   currentUser = null;
-  S = { pu:{M:30,D:9,n:0}, sq:{M:40,D:12,n:0}, history:[], initialized:false };
+  S = defaultState();
   renderLoginOv();
   document.getElementById('loginOv').classList.remove('hidden');
 }
@@ -668,8 +788,11 @@ function switchUser() {
 function saveSetup() {
   const p = Math.max(1, parseInt(document.getElementById('setupPush').value) || 30);
   const q = Math.max(1, parseInt(document.getElementById('setupSquat').value) || 40);
-  S.pu = { M: p, D: p * 0.30, n: 0 };
-  S.sq = { M: q, D: q * 0.30, n: 0 };
+  const puI = initSets(p);
+  const sqI = initSets(q);
+  S.pu = { M: p, TM: puI.TM, sets: puI.sets, n: 0 };
+  S.sq = { M: q, TM: sqI.TM, sets: sqI.sets, n: 0 };
+  S.settings = S.settings || { repCap: 35 };
   S.initialized = true;
   save();
   document.getElementById('setupOv').classList.add('hidden');
@@ -677,22 +800,26 @@ function saveSetup() {
 }
 
 // ══════════════════════════════════════════════
-// WORKOUT INPUT STATE
+// WORKOUT STATE
 // ══════════════════════════════════════════════
-let wk = { pu: 10, sq: 10 };
+let wk = { pu: [], sq: [] };
 
-function adj(field, delta) {
-  wk[field] = Math.max(0, wk[field] + delta);
-  const el = document.getElementById('num-' + field);
-  if (el) el.textContent = wk[field];
+function adjSet(ex, idx, delta) {
+  wk[ex][idx] = Math.max(0, wk[ex][idx] + delta);
+  const el = document.getElementById(`sv-${ex}-${idx}`);
+  if (el) el.textContent = wk[ex][idx];
 }
 
 function logWorkout() {
-  const pu_e = { actual: wk.pu, target: S.pu.D, M: S.pu.M };
-  const sq_e = { actual: wk.sq, target: S.sq.D, M: S.sq.M };
+  const puAmrap = wk.pu[4];
+  const sqAmrap = wk.sq[4];
+  const pu_e = { sets: [...wk.pu], amrap: puAmrap, TM: S.pu.TM, M: S.pu.M };
+  const sq_e = { sets: [...wk.sq], amrap: sqAmrap, TM: S.sq.TM, M: S.sq.M };
   S.history.push({ date: new Date().toISOString(), pu: pu_e, sq: sq_e });
-  Object.assign(S.pu, applyFormula(S.pu, wk.pu));
-  Object.assign(S.sq, applyFormula(S.sq, wk.sq));
+  const newPu = progressSets(S.pu, puAmrap);
+  const newSq = progressSets(S.sq, sqAmrap);
+  Object.assign(S.pu, newPu);
+  Object.assign(S.sq, newSq);
   save();
   renderResult(pu_e, sq_e, false);
 }
@@ -701,28 +828,52 @@ function logWorkout() {
 // RENDER — HOME
 // ══════════════════════════════════════════════
 function renderHome() {
-  const days    = weekDays();
+  const days    = mwfDays();
   const strk    = streak();
   const logged  = loggedToday();
+  const today   = new Date();
+  const todayIsWO = isWorkoutDay(today);
 
-  const wgDots = days.map(d => `
-    <div class="wg-cell">
-      <div class="wg-dot ${d.hit ? 'hit' : ''} ${d.isToday && !d.hit ? 'today' : ''}">
+  const mwgDots = days.map(d => `
+    <div class="mwg-cell">
+      <div class="mwg-dot ${d.hit ? 'hit' : ''} ${d.isToday && !d.hit ? 'today' : ''}">
         ${d.hit ? '✓' : ''}
       </div>
-      <div class="wg-day">${d.label}</div>
+      <div class="mwg-day">${d.label}</div>
     </div>`).join('');
 
-  const loggedBadge = logged
-    ? `<div class="logged-flag">&nbsp;logged today</div>` : '';
+  let dayBadge = '';
+  if (logged) {
+    dayBadge = `<div class="logged-flag">&nbsp;logged today</div>`;
+  } else if (todayIsWO) {
+    dayBadge = `<div class="workout-day-badge">▶ workout day</div>`;
+  } else {
+    const days_en = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    // find next MWF
+    let next = new Date(today);
+    for (let i = 1; i <= 7; i++) {
+      next.setDate(today.getDate() + i);
+      if (MWF.has(next.getDay())) break;
+    }
+    dayBadge = `<div class="rest-day-badge">rest day · next: ${days_en[next.getDay()]}</div>`;
+  }
+
+  // compact set summary: show all 9 set targets
+  function setsMini(ex, color) {
+    return ex.sets.map((r, i) =>
+      i === 4
+        ? `<span style="color:${color};font-weight:800">${r}*</span>`
+        : `<span>${r}</span>`
+    ).join(' · ');
+  }
 
   document.getElementById('pg-home').innerHTML = `
     <div class="app-header">
       <div class="app-header-top">
-        <div class="app-name">REP TRACKER<span class="cursor"></span></div>
+        <div class="app-name">BARESTRENGTH<span class="cursor"></span></div>
         <div class="app-meta">${currentUser} · n=${S.history.length}</div>
       </div>
-      <div style="font-size:10px;color:var(--muted)">// adaptive progressive overload</div>
+      <div style="font-size:10px;color:var(--muted)">// nSuns · MWF · 9 sets</div>
     </div>
 
     <div class="stats-strip">
@@ -735,30 +886,32 @@ function renderHome() {
         <div class="stat-key">sessions</div>
       </div>
       <div class="stat-cell">
-        <div class="stat-num" style="color:var(--orange)">${rnd(S.pu.M)}</div>
-        <div class="stat-key">push M</div>
+        <div class="stat-num" style="color:var(--orange)">${S.pu.TM}</div>
+        <div class="stat-key">push TM</div>
       </div>
       <div class="stat-cell">
-        <div class="stat-num" style="color:var(--blue)">${rnd(S.sq.M)}</div>
-        <div class="stat-key">squat M</div>
+        <div class="stat-num" style="color:var(--blue)">${S.sq.TM}</div>
+        <div class="stat-key">squat TM</div>
       </div>
     </div>
 
-    <div class="section-head">this week</div>
-    <div class="week-grid" style="margin-bottom:20px">${wgDots}</div>
+    <div class="section-head">last 9 sessions</div>
+    <div class="mwf-grid" style="margin-bottom:20px">${mwgDots}</div>
 
-    <div class="section-head">today's targets</div>
-    ${loggedBadge}
+    <div class="section-head">next session</div>
+    ${dayBadge}
     <div class="target-grid" style="margin-bottom:20px">
       <div class="target-cell">
         <div class="tc-label" style="color:var(--orange)">Push-ups</div>
-        <div class="tc-num" style="color:var(--orange)">${rnd(S.pu.D)}</div>
-        <div class="tc-sub">target reps</div>
+        <div class="tc-num" style="color:var(--orange)">${S.pu.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
+        <div class="tc-sub">AMRAP target · TM ${S.pu.TM}</div>
+        <div class="tc-sets-mini">${setsMini(S.pu, 'var(--orange)')}</div>
       </div>
       <div class="target-cell">
         <div class="tc-label" style="color:var(--blue)">Squats</div>
-        <div class="tc-num" style="color:var(--blue)">${rnd(S.sq.D)}</div>
-        <div class="tc-sub">target reps</div>
+        <div class="tc-num" style="color:var(--blue)">${S.sq.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
+        <div class="tc-sub">AMRAP target · TM ${S.sq.TM}</div>
+        <div class="tc-sets-mini">${setsMini(S.sq, 'var(--blue)')}</div>
       </div>
     </div>
 
@@ -771,6 +924,24 @@ function renderHome() {
 // ══════════════════════════════════════════════
 // RENDER — WORKOUT
 // ══════════════════════════════════════════════
+function buildSetRows(ex, key, color) {
+  return S[ex].sets.map((target, i) => {
+    const isAmrap = i === 4;
+    const rowClass = isAmrap ? 'set-row amrap-row' : 'set-row';
+    const label = isAmrap ? 'AMRAP' : `target <b>${target}</b>`;
+    return `
+      <div class="${rowClass}">
+        <div class="set-num">S${i+1}</div>
+        <div class="set-target">${label}</div>
+        <div class="set-controls">
+          <button class="sc-btn" onclick="adjSet('${key}',${i},-1)">−</button>
+          <div class="sc-val" id="sv-${key}-${i}" style="color:${isAmrap ? color : 'var(--text)'}">${wk[key][i]}</div>
+          <button class="sc-btn" onclick="adjSet('${key}',${i},+1)">+</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 function renderWorkout() {
   if (loggedToday()) {
     const last = S.history[S.history.length - 1];
@@ -778,8 +949,8 @@ function renderWorkout() {
     return;
   }
 
-  wk.pu = rnd(S.pu.D);
-  wk.sq = rnd(S.sq.D);
+  wk.pu = [...S.pu.sets];
+  wk.sq = [...S.sq.sets];
 
   document.getElementById('pg-workout').innerHTML = `
     <div class="app-header">
@@ -787,45 +958,48 @@ function renderWorkout() {
         <div class="app-name">LOG WORKOUT</div>
         <div class="app-meta">session #${S.history.length + 1}</div>
       </div>
-      <div style="font-size:10px;color:var(--muted)">// adjust reps, then confirm</div>
+      <div style="font-size:10px;color:var(--muted)">// set 5 = AMRAP · adjust if needed</div>
     </div>
 
     <div class="ex-block">
       <div class="ex-block-head">
         <div class="ex-block-name" style="color:var(--orange)">Push-ups</div>
-        <div class="ex-block-target">target: <span>${rnd(S.pu.D)}</span></div>
+        <div class="ex-block-meta">TM <span>${S.pu.TM}</span></div>
       </div>
-      <div class="num-row">
-        <button class="ni-btn" onclick="adj('pu',-1)">−</button>
-        <div class="ni-val" id="num-pu" style="color:var(--orange)">${wk.pu}</div>
-        <button class="ni-btn" onclick="adj('pu',+1)">+</button>
-      </div>
+      ${buildSetRows('pu', 'pu', 'var(--orange)')}
     </div>
 
-    <div class="ex-block">
+    <div class="ex-block" style="margin-bottom:14px">
       <div class="ex-block-head">
         <div class="ex-block-name" style="color:var(--blue)">Squats</div>
-        <div class="ex-block-target">target: <span>${rnd(S.sq.D)}</span></div>
+        <div class="ex-block-meta">TM <span>${S.sq.TM}</span></div>
       </div>
-      <div class="num-row">
-        <button class="ni-btn" onclick="adj('sq',-1)">−</button>
-        <div class="ni-val" id="num-sq" style="color:var(--blue)">${wk.sq}</div>
-        <button class="ni-btn" onclick="adj('sq',+1)">+</button>
-      </div>
+      ${buildSetRows('sq', 'sq', 'var(--blue)')}
     </div>
 
-    <button class="btn btn-primary" style="margin-top:8px" onclick="logWorkout()">
+    <button class="btn btn-primary" onclick="logWorkout()">
       [ CONFIRM + LOG ✓ ]
     </button>
   `;
 }
 
+// ══════════════════════════════════════════════
+// RENDER — RESULT
+// ══════════════════════════════════════════════
 function renderResult(pu, sq, readonly) {
-  const diff   = (a, t) => a - rnd(t);
-  const puDiff = diff(pu.actual, pu.target);
-  const sqDiff = diff(sq.actual, sq.target);
-  const cls    = d => d > 0 ? 'd-pos' : d < 0 ? 'd-neg' : 'd-zero';
-  const sign   = d => d > 0 ? '+' : '';
+  function progressLabel(amrap) {
+    if (amrap <= 30) return '<span style="color:var(--muted)">no change</span>';
+    if (amrap <= 34) return '<span style="color:var(--green)">+2 all sets</span>';
+    if (amrap <= 38) return '<span style="color:var(--green)">+3 all sets</span>';
+    return '<span style="color:var(--orange)">+5 all sets</span>';
+  }
+
+  function pillsHTML(sets, color) {
+    return sets.map((r, i) => {
+      const isAmrap = i === 4;
+      return `<div class="ns-pill ${isAmrap ? 'amrap' : ''}" style="${isAmrap ? '' : `border-color:${color}33`}">${r}${isAmrap ? '*' : ''}</div>`;
+    }).join('');
+  }
 
   document.getElementById('pg-workout').innerHTML = `
     <div class="app-header">
@@ -835,30 +1009,30 @@ function renderResult(pu, sq, readonly) {
       </div>
     </div>
 
-    <div class="section-head">actual vs target</div>
+    <div class="section-head">AMRAP results</div>
     <div class="result-block" style="margin-bottom:14px">
       <div class="result-row">
-        <div class="rr-label" style="color:var(--orange)">push-ups</div>
-        <div class="rr-actual" style="color:var(--orange)">${pu.actual}</div>
-        <div class="rr-diff ${cls(puDiff)}">${sign(puDiff)}${puDiff}</div>
+        <div class="rr-label" style="color:var(--orange)">push-up set 5</div>
+        <div class="rr-actual" style="color:var(--orange)">${pu.amrap !== undefined ? pu.amrap : (pu.sets ? pu.sets[4] : pu.actual)}</div>
+        <div class="rr-diff d-zero">${progressLabel(pu.amrap !== undefined ? pu.amrap : (pu.sets ? pu.sets[4] : pu.actual))}</div>
       </div>
       <div class="result-row">
-        <div class="rr-label" style="color:var(--blue)">squats</div>
-        <div class="rr-actual" style="color:var(--blue)">${sq.actual}</div>
-        <div class="rr-diff ${cls(sqDiff)}">${sign(sqDiff)}${sqDiff}</div>
+        <div class="rr-label" style="color:var(--blue)">squat set 5</div>
+        <div class="rr-actual" style="color:var(--blue)">${sq.amrap !== undefined ? sq.amrap : (sq.sets ? sq.sets[4] : sq.actual)}</div>
+        <div class="rr-diff d-zero">${progressLabel(sq.amrap !== undefined ? sq.amrap : (sq.sets ? sq.sets[4] : sq.actual))}</div>
       </div>
     </div>
 
     <div class="section-head">next session</div>
     <div class="next-block">
-      <div class="next-label">&gt; D_{n+1} computed</div>
-      <div class="next-row">
-        <div class="next-row-key" style="color:var(--orange)">push-ups</div>
-        <div class="next-row-val" style="color:var(--orange)">${rnd(S.pu.D)}</div>
+      <div class="next-label">&gt; updated sets</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">push-ups · TM ${S.pu.TM}</div>
+      <div class="next-sets-row" style="margin-bottom:12px">
+        ${pillsHTML(S.pu.sets, 'var(--orange)')}
       </div>
-      <div class="next-row">
-        <div class="next-row-key" style="color:var(--blue)">squats</div>
-        <div class="next-row-val" style="color:var(--blue)">${rnd(S.sq.D)}</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">squats · TM ${S.sq.TM}</div>
+      <div class="next-sets-row">
+        ${pillsHTML(S.sq.sets, 'var(--blue)')}
       </div>
     </div>
 
@@ -869,13 +1043,25 @@ function renderResult(pu, sq, readonly) {
 }
 
 // ══════════════════════════════════════════════
-// DATA SECTION HTML (reused in progress page)
+// DATA SECTION
 // ══════════════════════════════════════════════
 function dataSection() {
   const lastSaved = S.history.length
     ? new Date(S.history[S.history.length-1].date).toLocaleString()
     : 'never';
   return `
+    <div class="section-head">settings</div>
+    <div class="formula-block" style="margin-bottom:10px">
+      <div class="formula-head">// program settings</div>
+      <div class="settings-row">
+        <div class="sr-key">non-AMRAP rep cap (1–100)</div>
+        <input class="sr-input" type="number" id="repCapInput"
+          value="${S.settings ? S.settings.repCap : 35}"
+          min="1" max="100"
+          onchange="saveRepCap()" onblur="saveRepCap()">
+      </div>
+    </div>
+
     <div class="section-head">data</div>
     <div class="data-block" style="margin-bottom:10px">
       <div class="data-row">
@@ -930,13 +1116,20 @@ function renderProgress() {
     return;
   }
 
-  const puBest = Math.max(...S.history.map(h => h.pu.actual));
-  const sqBest = Math.max(...S.history.map(h => h.sq.actual));
-  const puAvg  = Math.round(S.history.reduce((a,h) => a + h.pu.actual, 0) / S.history.length);
-  const sqAvg  = Math.round(S.history.reduce((a,h) => a + h.sq.actual, 0) / S.history.length);
+  // Use amrap field if present, otherwise fall back to sets[4] or actual (legacy)
+  function getAmrap(h, ex) {
+    if (h[ex].amrap !== undefined) return h[ex].amrap;
+    if (h[ex].sets) return h[ex].sets[4];
+    return h[ex].actual || 0;
+  }
 
-  const puData = S.history.map(h => ({ date:h.date, actual:h.pu.actual, target:h.pu.target }));
-  const sqData = S.history.map(h => ({ date:h.date, actual:h.sq.actual, target:h.sq.target }));
+  const puBest = Math.max(...S.history.map(h => getAmrap(h, 'pu')));
+  const sqBest = Math.max(...S.history.map(h => getAmrap(h, 'sq')));
+  const puAvg  = Math.round(S.history.reduce((a,h) => a + getAmrap(h, 'pu'), 0) / S.history.length);
+  const sqAvg  = Math.round(S.history.reduce((a,h) => a + getAmrap(h, 'sq'), 0) / S.history.length);
+
+  const puData = S.history.map(h => ({ date:h.date, actual: getAmrap(h,'pu'), target: h.pu.TM || (h.pu.M || 30) }));
+  const sqData = S.history.map(h => ({ date:h.date, actual: getAmrap(h,'sq'), target: h.sq.TM || (h.sq.M || 40) }));
 
   el.innerHTML = `
     <div class="app-header">
@@ -944,73 +1137,81 @@ function renderProgress() {
         <div class="app-name">PROGRESS</div>
         <div class="app-meta">n=${S.history.length}</div>
       </div>
-      <div style="font-size:10px;color:var(--muted)">// performance over time</div>
+      <div style="font-size:10px;color:var(--muted)">// AMRAP set 5 performance</div>
     </div>
 
     <div class="section-head">stats</div>
     <div class="prog-stats" style="margin-bottom:16px">
       <div class="ps-cell">
         <div class="ps-val" style="color:var(--orange)">${puBest}</div>
-        <div class="ps-key">best push-ups</div>
+        <div class="ps-key">best push AMRAP</div>
       </div>
       <div class="ps-cell">
         <div class="ps-val" style="color:var(--blue)">${sqBest}</div>
-        <div class="ps-key">best squats</div>
+        <div class="ps-key">best squat AMRAP</div>
       </div>
       <div class="ps-cell">
         <div class="ps-val" style="color:var(--orange)">${puAvg}</div>
-        <div class="ps-key">avg push-ups</div>
+        <div class="ps-key">avg push AMRAP</div>
       </div>
       <div class="ps-cell">
         <div class="ps-val" style="color:var(--blue)">${sqAvg}</div>
-        <div class="ps-key">avg squats</div>
+        <div class="ps-key">avg squat AMRAP</div>
       </div>
     </div>
 
-    <div class="section-head">push-up graph</div>
+    <div class="section-head">push-up AMRAP graph</div>
     <div class="chart-block" style="margin-bottom:16px">
       <div class="chart-legend">
-        <div class="leg-item"><div class="leg-line" style="background:var(--orange)"></div>actual</div>
-        <div class="leg-item"><div class="leg-dash"></div>target Dₙ</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--orange)"></div>AMRAP reps</div>
+        <div class="leg-item"><div class="leg-dash"></div>TM</div>
       </div>
       ${buildChart(puData, 'var(--orange)')}
     </div>
 
-    <div class="section-head">squat graph</div>
+    <div class="section-head">squat AMRAP graph</div>
     <div class="chart-block" style="margin-bottom:16px">
       <div class="chart-legend">
-        <div class="leg-item"><div class="leg-line" style="background:var(--blue)"></div>actual</div>
-        <div class="leg-item"><div class="leg-dash"></div>target Dₙ</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--blue)"></div>AMRAP reps</div>
+        <div class="leg-item"><div class="leg-dash"></div>TM</div>
       </div>
       ${buildChart(sqData, 'var(--blue)')}
     </div>
 
-    <div class="section-head">formula state</div>
-    <div class="formula-block">
+    <div class="section-head">program state</div>
+    <div class="formula-block" style="margin-bottom:10px">
       <div class="formula-head">// current parameters</div>
       <div class="formula-row">
-        <div class="fr-key">push-up M (max capacity)</div>
-        <div class="fr-val" style="color:var(--orange)">${S.pu.M.toFixed(2)}</div>
+        <div class="fr-key">push-up max (M)</div>
+        <div class="fr-val" style="color:var(--orange)">${S.pu.M}</div>
       </div>
       <div class="formula-row">
-        <div class="fr-key">squat M (max capacity)</div>
-        <div class="fr-val" style="color:var(--blue)">${S.sq.M.toFixed(2)}</div>
+        <div class="fr-key">push-up training max (TM)</div>
+        <div class="fr-val" style="color:var(--orange)">${S.pu.TM}</div>
       </div>
       <div class="formula-row">
-        <div class="fr-key">push-up n (sessions)</div>
+        <div class="fr-key">push-up sessions</div>
         <div class="fr-val">${S.pu.n}</div>
       </div>
       <div class="formula-row">
-        <div class="fr-key">squat n (sessions)</div>
+        <div class="fr-key">push-up next sets</div>
+        <div class="fr-val" style="color:var(--orange);font-size:11px">${S.pu.sets.join(' · ')}</div>
+      </div>
+      <div class="formula-row">
+        <div class="fr-key">squat max (M)</div>
+        <div class="fr-val" style="color:var(--blue)">${S.sq.M}</div>
+      </div>
+      <div class="formula-row">
+        <div class="fr-key">squat training max (TM)</div>
+        <div class="fr-val" style="color:var(--blue)">${S.sq.TM}</div>
+      </div>
+      <div class="formula-row">
+        <div class="fr-key">squat sessions</div>
         <div class="fr-val">${S.sq.n}</div>
       </div>
       <div class="formula-row">
-        <div class="fr-key">next push-up D_{n+1}</div>
-        <div class="fr-val" style="color:var(--orange)">${S.pu.D.toFixed(2)}</div>
-      </div>
-      <div class="formula-row">
-        <div class="fr-key">next squat D_{n+1}</div>
-        <div class="fr-val" style="color:var(--blue)">${S.sq.D.toFixed(2)}</div>
+        <div class="fr-key">squat next sets</div>
+        <div class="fr-val" style="color:var(--blue);font-size:11px">${S.sq.sets.join(' · ')}</div>
       </div>
     </div>
 
@@ -1019,7 +1220,7 @@ function renderProgress() {
 }
 
 // ══════════════════════════════════════════════
-// SVG LINE CHART — terminal dark style
+// SVG LINE CHART
 // ══════════════════════════════════════════════
 function buildChart(data, color) {
   const W = 330, H = 160;
@@ -1032,7 +1233,6 @@ function buildChart(data, color) {
   const xp   = i => P.l + (n <= 1 ? iW / 2 : (i / (n - 1)) * iW);
   const yp   = v => P.t + (1 - v / maxV) * iH;
 
-  // Grid lines + Y labels
   let grid = '';
   for (let k = 0; k <= 4; k++) {
     const v = Math.round((k / 4) * maxV);
@@ -1052,7 +1252,6 @@ function buildChart(data, color) {
     const tC = data.map((d,i) => `${xp(i).toFixed(1)},${yp(d.target).toFixed(1)}`);
     const aD = aC.map((c,i) => `${i?'L':'M'}${c}`).join('');
     const tD = tC.map((c,i) => `${i?'L':'M'}${c}`).join('');
-    // Area fill
     const areaD = `M${xp(0).toFixed(1)},${(P.t+iH).toFixed(1)} L${aC.join(' L')} L${xp(n-1).toFixed(1)},${(P.t+iH).toFixed(1)} Z`;
     paths  = `<path d="${areaD}" fill="${color}" opacity="0.06"/>`;
     paths += `<path d="${tD}" fill="none" stroke="#2A2A2A" stroke-width="1.5" stroke-dasharray="5,4"/>`;
@@ -1060,7 +1259,6 @@ function buildChart(data, color) {
     dots   = data.map((d,i) => `<circle cx="${xp(i).toFixed(1)}" cy="${yp(d.actual).toFixed(1)}" r="3" fill="${color}"/>`).join('');
   }
 
-  // X labels — up to 5
   let xLabels = '';
   if (n > 1) {
     const idxs = [...new Set(Array.from({length: Math.min(n,5)}, (_,k) => Math.round(k / (Math.min(n,5)-1) * (n-1))))];
