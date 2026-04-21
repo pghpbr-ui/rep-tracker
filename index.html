@@ -469,16 +469,27 @@ function load() {
   try {
     const s = localStorage.getItem(getStorageKey());
     if (s) S = JSON.parse(s);
-    if (S.initialized && !Array.isArray(S.pu.sets)) {
-      const puI = initSets(S.pu.M || 30);
-      const sqI = initSets(S.sq.M || 40);
-      S.pu = { M: S.pu.M || 30, TM: puI.TM, sets: puI.sets, n: S.pu.n || 0 };
-      S.sq = { M: S.sq.M || 40, TM: sqI.TM, sets: sqI.sets, n: S.sq.n || 0 };
-      S.settings = { repCap: 35, restSecs: 90 };
+  } catch(e) { S = defaultState(); }
+}
+
+function normalizeState() {
+  if (!S || typeof S !== 'object') { S = defaultState(); return; }
+  if (!Array.isArray(S.history)) S.history = [];
+  if (!S.settings || typeof S.settings !== 'object') S.settings = { repCap: 35, restSecs: 90 };
+  if (!S.settings.repCap)  S.settings.repCap  = 35;
+  if (!S.settings.restSecs) S.settings.restSecs = 90;
+  ['pu', 'sq'].forEach(ex => {
+    const def = ex === 'pu' ? 30 : 40;
+    if (!S[ex] || typeof S[ex] !== 'object') S[ex] = { M: def, TM: Math.round(def*0.9), sets: initSets(def).sets, n: 0 };
+    if (!S[ex].M || S[ex].M < 1) S[ex].M = def;
+    if (!Array.isArray(S[ex].sets) || S[ex].sets.length < 9) {
+      const ini = initSets(S[ex].M);
+      S[ex].TM  = ini.TM;
+      S[ex].sets = ini.sets;
     }
-    if (!S.settings) S.settings = { repCap: 35, restSecs: 90 };
-    if (!S.settings.restSecs) S.settings.restSecs = 90;
-  } catch(e) {}
+    if (!S[ex].TM || S[ex].TM < 1) S[ex].TM = Math.round(S[ex].M * 0.9);
+    if (typeof S[ex].n !== 'number') S[ex].n = 0;
+  });
 }
 
 let _saveToastTimer = null;
@@ -670,6 +681,7 @@ function setUser(name) {
   localStorage.setItem('rt3_user', name);
   S = defaultState();
   load();
+  normalizeState();
   document.getElementById('loginOv').classList.add('hidden');
   if (!S.initialized) document.getElementById('setupOv').classList.remove('hidden');
   else { document.getElementById('setupOv').classList.add('hidden'); nav('home'); }
@@ -1054,58 +1066,68 @@ function renderHome() {
     ).join(' · ');
   }
 
-  document.getElementById('pg-home').innerHTML = `
-    <div class="app-header">
-      <div class="app-header-top">
-        <div class="app-name">BARESTRENGTH<span class="cursor"></span></div>
-        <div class="app-meta">${currentUser} · n=${S.history.length}</div>
+  try {
+    document.getElementById('pg-home').innerHTML = `
+      <div class="app-header">
+        <div class="app-header-top">
+          <div class="app-name">BARESTRENGTH<span class="cursor"></span></div>
+          <div class="app-meta">${currentUser} · n=${S.history.length}</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">// nSuns · MWF · 9 sets</div>
       </div>
-      <div style="font-size:10px;color:var(--muted)">// nSuns · MWF · 9 sets</div>
-    </div>
 
-    <div class="stats-strip">
-      <div class="stat-cell">
-        <div class="stat-num" style="color:var(--orange)">${strk}</div>
-        <div class="stat-key">streak</div>
+      <div class="stats-strip">
+        <div class="stat-cell">
+          <div class="stat-num" style="color:var(--orange)">${strk}</div>
+          <div class="stat-key">streak</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">${S.history.length}</div>
+          <div class="stat-key">sessions</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num" style="color:var(--orange)">${S.pu.TM}</div>
+          <div class="stat-key">push TM</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num" style="color:var(--blue)">${S.sq.TM}</div>
+          <div class="stat-key">squat TM</div>
+        </div>
       </div>
-      <div class="stat-cell">
-        <div class="stat-num">${S.history.length}</div>
-        <div class="stat-key">sessions</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num" style="color:var(--orange)">${S.pu.TM}</div>
-        <div class="stat-key">push TM</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num" style="color:var(--blue)">${S.sq.TM}</div>
-        <div class="stat-key">squat TM</div>
-      </div>
-    </div>
 
-    <div class="section-head">last 9 sessions</div>
-    <div class="mwf-grid" style="margin-bottom:20px">${mwgDots}</div>
+      <div class="section-head">last 9 sessions</div>
+      <div class="mwf-grid" style="margin-bottom:20px">${mwgDots}</div>
 
-    <div class="section-head">next session</div>
-    ${dayBadge}
-    <div class="target-grid" style="margin-bottom:20px">
-      <div class="target-cell">
-        <div class="tc-label" style="color:var(--orange)">Push-ups</div>
-        <div class="tc-num" style="color:var(--orange)">${S.pu.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
-        <div class="tc-sub">AMRAP target · TM ${S.pu.TM}</div>
-        <div class="tc-sets-mini">${setsMini(S.pu,'var(--orange)')}</div>
+      <div class="section-head">next session</div>
+      ${dayBadge}
+      <div class="target-grid" style="margin-bottom:20px">
+        <div class="target-cell">
+          <div class="tc-label" style="color:var(--orange)">Push-ups</div>
+          <div class="tc-num" style="color:var(--orange)">${S.pu.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
+          <div class="tc-sub">AMRAP target · TM ${S.pu.TM}</div>
+          <div class="tc-sets-mini">${setsMini(S.pu,'var(--orange)')}</div>
+        </div>
+        <div class="target-cell">
+          <div class="tc-label" style="color:var(--blue)">Squats</div>
+          <div class="tc-num" style="color:var(--blue)">${S.sq.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
+          <div class="tc-sub">AMRAP target · TM ${S.sq.TM}</div>
+          <div class="tc-sets-mini">${setsMini(S.sq,'var(--blue)')}</div>
+        </div>
       </div>
-      <div class="target-cell">
-        <div class="tc-label" style="color:var(--blue)">Squats</div>
-        <div class="tc-num" style="color:var(--blue)">${S.sq.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
-        <div class="tc-sub">AMRAP target · TM ${S.sq.TM}</div>
-        <div class="tc-sets-mini">${setsMini(S.sq,'var(--blue)')}</div>
-      </div>
-    </div>
 
-    <button class="btn btn-primary" onclick="nav('workout')">
-      [ ${logged ? 'VIEW TODAY\'S LOG' : '▶ START WORKOUT'} ]
-    </button>
-  `;
+      <button class="btn btn-primary" onclick="nav('workout')">
+        [ ${logged ? 'VIEW TODAY\'S LOG' : '▶ START WORKOUT'} ]
+      </button>
+    `;
+  } catch(e) {
+    document.getElementById('pg-home').innerHTML = `
+      <div style="padding:24px">
+        <div style="color:var(--red);font-size:11px;margin-bottom:8px">// render error: ${e.message}</div>
+        <div style="color:var(--muted);font-size:11px;margin-bottom:20px">Your saved data may be in an old format.</div>
+        <button class="btn btn-ghost" style="margin-bottom:8px" onclick="normalizeState();renderHome()">[ retry ]</button>
+        <button class="btn btn-red" onclick="confirmReset()">[ ⚠ reset all data ]</button>
+      </div>`;
+  }
 }
 
 // ══════════════════════════════════════════════
