@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#0D0D0D">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Rep Tracker">
-  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Rep%20Tracker%22,%22short_name%22:%22Reps%22,%22display%22:%22standalone%22,%22background_color%22:%22%230D0D0D%22,%22theme_color%22:%22%230D0D0D%22}">
+  <meta name="apple-mobile-web-app-title" content="Werkn'">
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Werkn'%22,%22short_name%22:%22Werkn'%22,%22display%22:%22standalone%22,%22background_color%22:%22%230D0D0D%22,%22theme_color%22:%22%230D0D0D%22}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <title>Rep Tracker</title>
+  <title>Werkn'</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -313,14 +313,6 @@
     .modal-body { font-size: 11px; color: var(--muted); line-height: 2; border-left: 2px solid var(--b2); padding-left: 12px; margin-bottom: 22px; }
     .modal-body strong { color: var(--text); }
 
-    /* ── BIRD ANIMATION ── */
-    @keyframes birdBounce {
-      0%,100% { transform: translateY(0); }
-      30%      { transform: translateY(-6px); }
-      60%      { transform: translateY(-3px); }
-    }
-    .bird-bounce { animation: birdBounce 0.7s ease-in-out infinite; display: inline-block; }
-
     /* ── SAVE TOAST ── */
     @keyframes fadeUp { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
     .save-toast {
@@ -371,9 +363,9 @@
 <!-- SETUP OVERLAY -->
 <div class="setup-ov" id="setupOv">
   <div class="setup-inner">
-    <div class="setup-logo">// barestrength</div>
+    <div class="setup-logo">// werkn'</div>
     <div class="setup-title">Initial Setup</div>
-    <div class="setup-desc">Enter your max reps in one unbroken set.<br>nSuns-style 9-set program, MWF schedule.</div>
+    <div class="setup-desc">Enter your max reps in one unbroken set.<br>nSuns-style 9-set program, 3x/week.</div>
     <div class="setup-field">
       <div class="setup-label"><div class="dot" style="background:var(--orange)"></div>max push-ups</div>
       <input class="setup-input" type="number" id="setupPush" value="30" min="1" max="999">
@@ -591,7 +583,7 @@ function exportData() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `barestrength-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `werkn-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -668,7 +660,7 @@ function renderLoginOv() {
       <div class="divider-or">or new user</div>`;
   }
   document.getElementById('loginInner').innerHTML = `
-    <div class="setup-logo">// barestrength</div>
+    <div class="setup-logo">// werkn'</div>
     <div class="setup-title">Sign In<span class="cursor"></span></div>
     <div class="setup-desc">Data stays on this device.<br>No password needed.</div>
     ${existingHTML}
@@ -742,41 +734,6 @@ function clearWkTimer() {
   if (wk.timer) { clearInterval(wk.timer); wk.timer = null; }
 }
 
-// ── Bird animation ──
-let _birdTimer  = null;
-let _birdFrame  = 0;
-const BIRD_FRAMES = [
-`   \\  /
-  (oo)>
-  (  )
-  /  \\`,
-`   --  --
-  (oo)>
-  (  )
-  /  \\`,
-`   /  \\
-  (oo)>
-  (  )
-  /  \\`,
-];
-
-function startBird() {
-  clearBirdTimer();
-  _birdFrame = 0;
-  const el = document.getElementById('bird-anim');
-  if (!el) return;
-  el.textContent = BIRD_FRAMES[0];
-  _birdTimer = setInterval(() => {
-    _birdFrame = (_birdFrame + 1) % BIRD_FRAMES.length;
-    const e = document.getElementById('bird-anim');
-    if (!e) { clearBirdTimer(); return; }
-    e.textContent = BIRD_FRAMES[_birdFrame];
-  }, 350);
-}
-
-function clearBirdTimer() {
-  if (_birdTimer) { clearInterval(_birdTimer); _birdTimer = null; }
-}
 
 function startWorkout(firstEx) {
   wk.order  = firstEx === 'pu' ? ['pu','sq'] : ['sq','pu'];
@@ -1102,14 +1059,10 @@ function renderResult(pu, sq, readonly) {
     </div>
 
     ${readonly ? '' : `
-    <div style="text-align:center;margin:0 0 20px">
-      <pre id="bird-anim" class="bird-bounce" style="font-family:var(--mono);color:var(--green);font-size:13px;line-height:1.7;margin:0 auto 8px;display:inline-block;user-select:none"></pre>
-      <div style="font-size:11px;font-weight:700;color:var(--green);letter-spacing:0.15em;text-transform:uppercase">nice work!</div>
-    </div>`}
+    <div style="text-align:center;font-size:11px;font-weight:700;color:var(--green);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:20px">nice work!</div>`}
 
     <button class="btn btn-ghost" onclick="nav('progress')">[ VIEW PROGRESS GRAPH → ]</button>
   `;
-  if (!readonly) startBird();
 }
 
 // ══════════════════════════════════════════════
@@ -1147,7 +1100,7 @@ function renderHome() {
     document.getElementById('pg-home').innerHTML = `
       <div class="app-header">
         <div class="app-header-top">
-          <div class="app-name">BARESTRENGTH<span class="cursor"></span></div>
+          <div class="app-name">WERKN'<span class="cursor"></span></div>
           <div class="app-meta">${currentUser} · n=${S.history.length}</div>
         </div>
         <div style="font-size:10px;color:var(--muted)">// nSuns · 9 sets · ${goal}x/week</div>
@@ -1383,7 +1336,7 @@ function buildChart(data, color) {
 // NAVIGATION
 // ══════════════════════════════════════════════
 function nav(page) {
-  if (page !== 'workout') { clearWkTimer(); clearBirdTimer(); }
+  if (page !== 'workout') clearWkTimer();
   document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
   document.getElementById('pg-' + page).classList.add('on');
