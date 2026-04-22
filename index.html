@@ -434,7 +434,7 @@
 <script>
 'use strict';
 
-const APP_VERSION = '20260421c';
+const APP_VERSION = '20260422';
 
 // ══════════════════════════════════════════════
 // STATE
@@ -727,16 +727,39 @@ function saveSetup() {
 // ══════════════════════════════════════════════
 let wk = {
   phase:   'select',
-  order:   [],      // ['pu','sq'] or ['sq','pu']
-  exIdx:   0,       // which exercise (index into order)
-  setIdx:  0,       // current set 0-8
+  order:   [],
+  exIdx:   0,
+  setIdx:  0,
   actual:  { pu: [], sq: [] },
   timer:   null,
-  restLeft: 0,
+  restLeft:    0,
+  restEndTime: 0,   // epoch ms — source of truth for timer
 };
 
 function clearWkTimer() {
   if (wk.timer) { clearInterval(wk.timer); wk.timer = null; }
+}
+
+function saveWk() {
+  if (!currentUser) return;
+  const { timer, ...rest } = wk;
+  localStorage.setItem('rt3_wk_' + currentUser, JSON.stringify(rest));
+}
+
+function loadWk() {
+  if (!currentUser) return false;
+  try {
+    const raw = localStorage.getItem('rt3_wk_' + currentUser);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved || saved.phase === 'select' || saved.phase === 'finished') return false;
+    wk = { ...saved, timer: null };
+    return true;
+  } catch { return false; }
+}
+
+function clearSavedWk() {
+  if (currentUser) localStorage.removeItem('rt3_wk_' + currentUser);
 }
 
 
@@ -746,6 +769,7 @@ function startWorkout(firstEx) {
   wk.setIdx = 0;
   wk.actual = { pu: [...S.pu.sets], sq: [...S.sq.sets] };
   wk.phase  = 'active';
+  saveWk();
   renderWkPhase();
 }
 
@@ -766,21 +790,23 @@ function completeSet() {
 
 function startRest() {
   clearWkTimer();
-  wk.phase    = 'rest';
-  wk.restLeft = S.settings.restSecs || 90;
+  wk.phase       = 'rest';
+  wk.restLeft    = S.settings.restSecs || 90;
+  wk.restEndTime = Date.now() + wk.restLeft * 1000;
+  saveWk();
   renderWkPhase();
   wk.timer = setInterval(() => {
-    wk.restLeft--;
+    wk.restLeft = Math.max(0, Math.round((wk.restEndTime - Date.now()) / 1000));
     const el = document.getElementById('rest-countdown');
     if (el) {
       el.textContent = wk.restLeft;
-      if (wk.restLeft <= 10) el.classList.add('ending');
+      el.classList.toggle('ending', wk.restLeft <= 10);
     }
     if (wk.restLeft <= 0) {
       clearWkTimer();
       advanceSet();
     }
-  }, 1000);
+  }, 500);
 }
 
 function skipRest() {
@@ -792,8 +818,10 @@ function adjustRestTime(delta) {
   const newSecs = Math.max(10, Math.min(300, S.settings.restSecs + delta));
   const diff    = newSecs - S.settings.restSecs;
   S.settings.restSecs = newSecs;
-  wk.restLeft = Math.max(1, wk.restLeft + diff);
+  wk.restLeft    = Math.max(1, wk.restLeft + diff);
+  wk.restEndTime = Date.now() + wk.restLeft * 1000;
   save();
+  saveWk();
   const countdown = document.getElementById('rest-countdown');
   if (countdown) {
     countdown.textContent = wk.restLeft;
@@ -806,6 +834,7 @@ function adjustRestTime(delta) {
 function advanceSet() {
   wk.setIdx++;
   wk.phase = 'active';
+  saveWk();
   renderWkPhase();
 }
 
@@ -822,11 +851,13 @@ function continueToNextEx() {
   wk.exIdx++;
   wk.setIdx = 0;
   wk.phase  = 'active';
+  saveWk();
   renderWkPhase();
 }
 
 function finishWorkout() {
   clearWkTimer();
+  clearSavedWk();
   const puAmrap = wk.actual.pu[4];
   const sqAmrap = wk.actual.sq[4];
   const pu_e = { sets: [...wk.actual.pu], amrap: puAmrap, TM: S.pu.TM, M: S.pu.M };
@@ -1008,8 +1039,31 @@ function renderWorkout() {
     return;
   }
   clearWkTimer();
-  wk = { phase:'select', order:[], exIdx:0, setIdx:0,
-         actual:{pu:[...S.pu.sets],sq:[...S.sq.sets]}, timer:null, restLeft:0 };
+  const resumed = loadWk();
+  if (!resumed) {
+    wk = { phase:'select', order:[], exIdx:0, setIdx:0,
+           actual:{pu:[...S.pu.sets],sq:[...S.sq.sets]},
+           timer:null, restLeft:0, restEndTime:0 };
+  }
+  // If we were resting, recalc restLeft from the stored end time
+  if (wk.phase === 'rest') {
+    wk.restLeft = Math.max(0, Math.round((wk.restEndTime - Date.now()) / 1000));
+    if (wk.restLeft <= 0) {
+      advanceSet();
+      return;
+    }
+    renderWkPhase();
+    wk.timer = setInterval(() => {
+      wk.restLeft = Math.max(0, Math.round((wk.restEndTime - Date.now()) / 1000));
+      const el = document.getElementById('rest-countdown');
+      if (el) {
+        el.textContent = wk.restLeft;
+        el.classList.toggle('ending', wk.restLeft <= 10);
+      }
+      if (wk.restLeft <= 0) { clearWkTimer(); advanceSet(); }
+    }, 500);
+    return;
+  }
   renderWkPhase();
 }
 
@@ -1341,7 +1395,7 @@ function buildChart(data, color) {
 // NAVIGATION
 // ══════════════════════════════════════════════
 function nav(page) {
-  if (page !== 'workout') clearWkTimer();
+  if (page !== 'workout') { saveWk(); clearWkTimer(); }
   document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
   document.getElementById('pg-' + page).classList.add('on');
@@ -1376,6 +1430,22 @@ function doAppUpdate() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/rep-tracker/sw.js');
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (wk.phase !== 'rest') return;
+  wk.restLeft = Math.max(0, Math.round((wk.restEndTime - Date.now()) / 1000));
+  if (wk.restLeft <= 0) {
+    clearWkTimer();
+    advanceSet();
+    return;
+  }
+  const el = document.getElementById('rest-countdown');
+  if (el) {
+    el.textContent = wk.restLeft;
+    el.classList.toggle('ending', wk.restLeft <= 10);
+  }
+});
 
 checkVersion();
 const _savedUser = localStorage.getItem('rt3_user');
