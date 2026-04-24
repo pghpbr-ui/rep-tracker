@@ -414,6 +414,7 @@
 <div id="pg-home"     class="pg on"></div>
 <div id="pg-workout"  class="pg"></div>
 <div id="pg-progress" class="pg"></div>
+<div id="pg-settings" class="pg"></div>
 
 <!-- NAV -->
 <nav class="nav">
@@ -429,12 +430,16 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     progress
   </button>
+  <button class="nb" id="nb-settings" onclick="nav('settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    settings
+  </button>
 </nav>
 
 <script>
 'use strict';
 
-const APP_VERSION = '20260423b';
+const APP_VERSION = '20260424';
 
 // ══════════════════════════════════════════════
 // STATE
@@ -1344,13 +1349,13 @@ function renderHome() {
       <div class="target-grid" style="margin-bottom:20px">
         <div class="target-cell">
           <div class="tc-label" style="color:var(--orange)">Push-ups</div>
-          <div class="tc-num" style="color:var(--orange)">${S.pu.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
+          <div class="tc-num" style="color:var(--orange)">${S.pu.sets[3]}<span style="font-size:18px;font-weight:600">*</span></div>
           <div class="tc-sub">AMRAP target · TM ${S.pu.TM}</div>
           <div class="tc-sets-mini">${setsMini(S.pu,'var(--orange)')}</div>
         </div>
         <div class="target-cell">
           <div class="tc-label" style="color:var(--blue)">Squats</div>
-          <div class="tc-num" style="color:var(--blue)">${S.sq.sets[4]}<span style="font-size:18px;font-weight:600">*</span></div>
+          <div class="tc-num" style="color:var(--blue)">${S.sq.sets[3]}<span style="font-size:18px;font-weight:600">*</span></div>
           <div class="tc-sub">AMRAP target · TM ${S.sq.TM}</div>
           <div class="tc-sets-mini">${setsMini(S.sq,'var(--blue)')}</div>
         </div>
@@ -1374,13 +1379,55 @@ function renderHome() {
 // ══════════════════════════════════════════════
 // RENDER — PROGRESS
 // ══════════════════════════════════════════════
-function dataSection() {
+function saveUsername() {
+  const el = document.getElementById('usernameInput');
+  if (!el) return;
+  const raw = el.value.trim().toLowerCase().replace(/[^a-z0-9_\-]/g, '');
+  if (!raw || raw === currentUser) { el.value = currentUser; return; }
+  if (getStoredUsers().includes(raw)) { el.value = currentUser; alert('That name is already taken.'); return; }
+  const oldDataKey = getStorageKey();
+  const oldWkKey   = 'rt3_wk_' + currentUser;
+  const data   = localStorage.getItem(oldDataKey);
+  const wkData = localStorage.getItem(oldWkKey);
+  if (data)   localStorage.setItem('rt3_' + raw, data);
+  if (wkData) { localStorage.setItem('rt3_wk_' + raw, wkData); localStorage.removeItem(oldWkKey); }
+  localStorage.removeItem(oldDataKey);
+  currentUser = raw;
+  localStorage.setItem('rt3_user', raw);
+  renderSettings();
+  renderHome();
+}
+
+function renderSettings() {
+  const el = document.getElementById('pg-settings');
   const lastSaved = S.history.length
     ? new Date(S.history[S.history.length-1].date).toLocaleString() : 'never';
-  return `
-    <div class="section-head">settings</div>
+  el.innerHTML = `
+    <div class="app-header">
+      <div class="app-header-top">
+        <div class="app-name">SETTINGS</div>
+        <div class="app-meta">v${APP_VERSION}</div>
+      </div>
+    </div>
+
+    <div class="section-head">profile</div>
     <div class="formula-block" style="margin-bottom:10px">
-      <div class="formula-head">// program settings</div>
+      <div class="formula-head">// account</div>
+      <div class="settings-row">
+        <div class="sr-key">username</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input class="sr-input" type="text" id="usernameInput"
+            value="${currentUser}" maxlength="32"
+            style="width:110px;font-size:12px;text-transform:lowercase"
+            onkeydown="if(event.key==='Enter') saveUsername()">
+          <button class="btn btn-ghost" style="padding:6px 10px;font-size:10px;width:auto" onclick="saveUsername()">save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">program</div>
+    <div class="formula-block" style="margin-bottom:10px">
+      <div class="formula-head">// workout settings</div>
       <div class="settings-row">
         <div class="sr-key">non-AMRAP rep cap (1–100)</div>
         <input class="sr-input" type="number" id="repCapInput"
@@ -1427,8 +1474,7 @@ function renderProgress() {
         <div class="es-icon">📈</div>
         <div class="es-title">No sessions logged</div>
         <div class="es-sub">Complete your first workout<br>to see your progress graph.</div>
-      </div>
-      ${dataSection()}`;
+      </div>`;
     return;
   }
 
@@ -1453,7 +1499,7 @@ function renderProgress() {
         <div class="app-name">PROGRESS</div>
         <div class="app-meta">n=${S.history.length} · v${APP_VERSION}</div>
       </div>
-      <div style="font-size:10px;color:var(--muted)">// AMRAP set 5 performance</div>
+      <div style="font-size:10px;color:var(--muted)">// AMRAP set 4 performance</div>
     </div>
 
     <div class="section-head">stats</div>
@@ -1494,8 +1540,6 @@ function renderProgress() {
       <div class="formula-row"><div class="fr-key">squat sessions</div><div class="fr-val">${S.sq.n}</div></div>
       <div class="formula-row"><div class="fr-key">squat next sets</div><div class="fr-val" style="color:var(--blue);font-size:11px">${S.sq.sets.join(' · ')}</div></div>
     </div>
-
-    ${dataSection()}
   `;
 }
 
@@ -1556,6 +1600,7 @@ function nav(page) {
   if (page === 'home')     renderHome();
   if (page === 'workout')  renderWorkout();
   if (page === 'progress') renderProgress();
+  if (page === 'settings') renderSettings();
 }
 
 // ══════════════════════════════════════════════
