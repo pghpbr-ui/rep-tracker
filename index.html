@@ -365,7 +365,7 @@
   <div class="setup-inner">
     <div class="setup-logo">// werkn'</div>
     <div class="setup-title">Initial Setup</div>
-    <div class="setup-desc">Enter your max reps in one unbroken set.<br>nSuns-style 9-set program, 3x/week.</div>
+    <div class="setup-desc">Enter your max reps in one unbroken set.<br>nSuns-style 7-set program, 3x/week.</div>
     <div class="setup-field">
       <div class="setup-label"><div class="dot" style="background:var(--orange)"></div>max push-ups</div>
       <input class="setup-input" type="number" id="setupPush" value="30" min="1" max="999">
@@ -375,9 +375,9 @@
       <input class="setup-input" type="number" id="setupSquat" value="40" min="1" max="999">
     </div>
     <div class="setup-note">
-      TM = 0.90 × max &nbsp;·&nbsp; 9 sets per exercise<br>
-      Sets: 55/60/65/70/75/70/65/60/55% of TM<br>
-      Set 5 = AMRAP · progression based on result<br>
+      TM = 0.90 × max &nbsp;·&nbsp; 7 sets per exercise<br>
+      Sets: 60/65/70/75/70/65/60% of TM<br>
+      Set 4 = AMRAP · progression based on result<br>
       Schedule: 3 days per week
     </div>
     <button class="btn btn-primary" onclick="saveSetup()">[ INITIALIZE → ]</button>
@@ -434,7 +434,7 @@
 <script>
 'use strict';
 
-const APP_VERSION = '20260423';
+const APP_VERSION = '20260423b';
 
 // ══════════════════════════════════════════════
 // STATE
@@ -451,7 +451,7 @@ function getStoredUsers() {
   return users.sort();
 }
 
-const NSUNS_PCTS = [0.55, 0.60, 0.65, 0.70, 0.75, 0.70, 0.65, 0.60, 0.55];
+const NSUNS_PCTS = [0.60, 0.65, 0.70, 0.75, 0.70, 0.65, 0.60];
 
 function initSets(M) {
   const TM = Math.max(1, Math.round(M * 0.9));
@@ -460,8 +460,8 @@ function initSets(M) {
 
 function defaultState() {
   return {
-    pu: { M: 30, TM: 27, sets: [15,16,18,21,20,21,18,16,15], n: 0 },
-    sq: { M: 40, TM: 36, sets: [20,22,23,25,27,25,23,22,20], n: 0 },
+    pu: { M: 30, TM: 27, sets: [16,18,19,20,19,18,16], n: 0 },
+    sq: { M: 40, TM: 36, sets: [22,23,25,27,25,23,22], n: 0 },
     settings: { repCap: 35, restSecs: 90, worksPerWeek: 3 },
     history: [],
     initialized: false,
@@ -488,7 +488,7 @@ function normalizeState() {
     const def = ex === 'pu' ? 30 : 40;
     if (!S[ex] || typeof S[ex] !== 'object') S[ex] = { M: def, TM: Math.round(def*0.9), sets: initSets(def).sets, n: 0 };
     if (!S[ex].M || S[ex].M < 1) S[ex].M = def;
-    if (!Array.isArray(S[ex].sets) || S[ex].sets.length < 9) {
+    if (!Array.isArray(S[ex].sets) || S[ex].sets.length !== 7) {
       const ini = initSets(S[ex].M);
       S[ex].TM  = ini.TM;
       S[ex].sets = ini.sets;
@@ -518,7 +518,7 @@ function progressSets(ex, amrap) {
   else                  inc = 5;
   if (inc === 0) return { ...ex, n: ex.n + 1 };
   const cap = S.settings.repCap || 35;
-  const sets = ex.sets.map((r, i) => i === 4 ? r + inc : Math.min(r + inc, cap));
+  const sets = ex.sets.map((r, i) => i === 3 ? r + inc : Math.min(r + inc, cap));
   return { ...ex, TM: ex.TM + inc, sets, n: ex.n + 1 };
 }
 
@@ -793,12 +793,12 @@ function startWorkout(firstEx) {
 
 function completeSet() {
   const ex = wk.order[wk.exIdx];
-  // For AMRAP (set 5), read the displayed value
-  if (wk.setIdx === 4) {
+  // For AMRAP (set 4), read the displayed value
+  if (wk.setIdx === 3) {
     const el = document.getElementById('amrap-display');
-    if (el) wk.actual[ex][4] = parseInt(el.textContent) || S[ex].sets[4];
+    if (el) wk.actual[ex][3] = parseInt(el.textContent) || S[ex].sets[3];
   }
-  if (wk.setIdx < 8) {
+  if (wk.setIdx < 6) {
     startRest();
   } else {
     wk.phase = 'ex-done';
@@ -858,11 +858,11 @@ function advanceSet() {
 
 function adjAmrap(delta) {
   const ex = wk.order[wk.exIdx];
-  wk.actual[ex][4] = Math.max(0, wk.actual[ex][4] + delta);
+  wk.actual[ex][3] = Math.max(0, wk.actual[ex][3] + delta);
   const el = document.getElementById('amrap-display');
-  if (el) el.textContent = wk.actual[ex][4];
+  if (el) el.textContent = wk.actual[ex][3];
   const btn = document.getElementById('amrap-confirm-btn');
-  if (btn) btn.textContent = `[ ✓ LOG ${wk.actual[ex][4]} REPS ]`;
+  if (btn) btn.textContent = `[ ✓ LOG ${wk.actual[ex][3]} REPS ]`;
 }
 
 function continueToNextEx() {
@@ -938,7 +938,7 @@ function renderWkSelect(page) {
 
   function setsMini(ex, color) {
     return S[ex].sets.map((r,i) =>
-      i===4 ? `<span style="color:${color};font-weight:800">${r}*</span>` : r
+      i===3 ? `<span style="color:${color};font-weight:800">${r}*</span>` : r
     ).join(' · ');
   }
 
@@ -971,7 +971,7 @@ function renderWkSelect(page) {
     ${puBtn}
     ${sqBtn}
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">
-      * = AMRAP (set 5) · the other exercise follows automatically
+      * = AMRAP (set 4) · the other exercise follows automatically
     </div>
   `;
 }
@@ -983,18 +983,18 @@ function renderWkActive(page) {
   const color   = ex === 'pu' ? 'var(--orange)' : 'var(--blue)';
   const setIdx  = wk.setIdx;
   const target  = S[ex].sets[setIdx];
-  const isAmrap = setIdx === 4;
-  const amrapVal = wk.actual[ex][4];
+  const isAmrap = setIdx === 3;
+  const amrapVal = wk.actual[ex][3];
 
-  const segs = Array.from({length:9}, (_,i) => {
+  const segs = Array.from({length:7}, (_,i) => {
     let cls = i < setIdx ? 'done' : i === setIdx ? 'current' : '';
     const style = i === setIdx ? `background:${color}` : '';
     return `<div class="sp-seg ${cls}" style="${style}"></div>`;
   }).join('');
 
   const nextSetIdx = setIdx + 1;
-  const nextHint = nextSetIdx < 9
-    ? `next → set ${nextSetIdx+1}: ${nextSetIdx===4 ? 'AMRAP' : S[ex].sets[nextSetIdx] + ' reps'}`
+  const nextHint = nextSetIdx < 7
+    ? `next → set ${nextSetIdx+1}: ${nextSetIdx===3 ? 'AMRAP' : S[ex].sets[nextSetIdx] + ' reps'}`
     : `last set · ${exName.toLowerCase()} done after this`;
 
   const bodyHTML = isAmrap ? `
@@ -1019,7 +1019,7 @@ function renderWkActive(page) {
     <div class="app-header">
       <div class="app-header-top">
         <div class="app-name" style="color:${color}">${exName.toUpperCase()}</div>
-        <div class="app-meta">set ${setIdx+1} / 9${isAmrap ? ' · AMRAP' : ''}</div>
+        <div class="app-meta">set ${setIdx+1} / 7${isAmrap ? ' · AMRAP' : ''}</div>
       </div>
     </div>
     <div class="set-progress">${segs}</div>
@@ -1033,7 +1033,7 @@ function renderWkRest(page) {
   const ex      = wk.order[wk.exIdx];
   const color   = ex === 'pu' ? 'var(--orange)' : 'var(--blue)';
   const nextIdx = wk.setIdx + 1;
-  const isNextAmrap = nextIdx === 4;
+  const isNextAmrap = nextIdx === 3;
   const nextTarget  = S[ex].sets[nextIdx];
 
   page.innerHTML = `
@@ -1067,7 +1067,7 @@ function renderWkExDone(page) {
   const ex      = wk.order[wk.exIdx];
   const exName  = ex === 'pu' ? 'Push-ups' : 'Squats';
   const color   = ex === 'pu' ? 'var(--orange)' : 'var(--blue)';
-  const amrap   = wk.actual[ex][4];
+  const amrap   = wk.actual[ex][3];
   const isLast  = wk.exIdx === wk.order.length - 1;
   const nextEx  = !isLast ? wk.order[wk.exIdx + 1] : null;
   const nextName  = nextEx === 'pu' ? 'PUSH-UPS' : nextEx === 'sq' ? 'SQUATS' : '';
@@ -1302,7 +1302,7 @@ function renderHome() {
 
   function setsMini(exData, color) {
     return exData.sets.map((r,i) =>
-      i===4 ? `<span style="color:${color};font-weight:800">${r}*</span>` : `<span>${r}</span>`
+      i===3 ? `<span style="color:${color};font-weight:800">${r}*</span>` : `<span>${r}</span>`
     ).join(' · ');
   }
 
@@ -1313,7 +1313,7 @@ function renderHome() {
           <div class="app-name">WERKN'<span class="cursor"></span></div>
           <div class="app-meta">${currentUser} · n=${S.history.length}</div>
         </div>
-        <div style="font-size:10px;color:var(--muted)">// nSuns · 9 sets · ${goal}x/week</div>
+        <div style="font-size:10px;color:var(--muted)">// nSuns · 7 sets · ${goal}x/week</div>
       </div>
 
       <div class="stats-strip">
