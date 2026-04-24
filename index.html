@@ -434,7 +434,7 @@
 <script>
 'use strict';
 
-const APP_VERSION = '20260422';
+const APP_VERSION = '20260423';
 
 // ══════════════════════════════════════════════
 // STATE
@@ -536,9 +536,14 @@ const rnd    = v  => Math.max(1, Math.round(v));
 const todayS = () => new Date().toDateString();
 const DAY_LABELS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
+function todayEntry() {
+  const todayStr = todayS();
+  return S.history.find(h => new Date(h.date).toDateString() === todayStr) || null;
+}
+
 function loggedToday() {
-  return S.history.length > 0 &&
-    new Date(S.history[S.history.length - 1].date).toDateString() === todayS();
+  const entry = todayEntry();
+  return !!(entry && entry.pu !== undefined && entry.sq !== undefined);
 }
 
 function weekDays() {
@@ -546,10 +551,16 @@ function weekDays() {
   return Array.from({length: 7}, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - (6 - i));
+    const dStr = d.toDateString();
+    const entry = S.history.find(h => new Date(h.date).toDateString() === dStr);
+    const puDone = !!(entry && entry.pu !== undefined);
+    const sqDone = !!(entry && entry.sq !== undefined);
     return {
-      label:   DAY_LABELS[d.getDay()],
-      hit:     S.history.some(h => new Date(h.date).toDateString() === d.toDateString()),
-      isToday: d.toDateString() === today.toDateString(),
+      label:    DAY_LABELS[d.getDay()],
+      puDone,
+      sqDone,
+      bothDone: puDone && sqDone,
+      isToday:  dStr === today.toDateString(),
     };
   });
 }
@@ -560,7 +571,9 @@ function worksThisWeek() {
   const monday = new Date(today);
   monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
   monday.setHours(0, 0, 0, 0);
-  return S.history.filter(h => new Date(h.date) >= monday).length;
+  return S.history.filter(h =>
+    new Date(h.date) >= monday && h.pu !== undefined && h.sq !== undefined
+  ).length;
 }
 
 function streak() {
@@ -569,7 +582,9 @@ function streak() {
   for (let i = 0; i < 365; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    if (S.history.some(h => new Date(h.date).toDateString() === d.toDateString())) n++;
+    const dStr = d.toDateString();
+    const entry = S.history.find(h => new Date(h.date).toDateString() === dStr);
+    if (entry && entry.pu !== undefined && entry.sq !== undefined) n++;
     else break;
   }
   return n;
@@ -764,7 +779,10 @@ function clearSavedWk() {
 
 
 function startWorkout(firstEx) {
-  wk.order  = firstEx === 'pu' ? ['pu','sq'] : ['sq','pu'];
+  const entry   = todayEntry();
+  const otherEx = firstEx === 'pu' ? 'sq' : 'pu';
+  const otherDone = !!(entry && entry[otherEx] !== undefined);
+  wk.order  = otherDone ? [firstEx] : (firstEx === 'pu' ? ['pu','sq'] : ['sq','pu']);
   wk.exIdx  = 0;
   wk.setIdx = 0;
   wk.actual = { pu: [...S.pu.sets], sq: [...S.sq.sets] };
@@ -858,15 +876,47 @@ function continueToNextEx() {
 function finishWorkout() {
   clearWkTimer();
   clearSavedWk();
-  const puAmrap = wk.actual.pu[4];
-  const sqAmrap = wk.actual.sq[4];
-  const pu_e = { sets: [...wk.actual.pu], amrap: puAmrap, TM: S.pu.TM, M: S.pu.M };
-  const sq_e = { sets: [...wk.actual.sq], amrap: sqAmrap, TM: S.sq.TM, M: S.sq.M };
-  S.history.push({ date: new Date().toISOString(), pu: pu_e, sq: sq_e });
-  Object.assign(S.pu, progressSets(S.pu, puAmrap));
-  Object.assign(S.sq, progressSets(S.sq, sqAmrap));
+  const todayStr = todayS();
+  let entryIdx = S.history.findIndex(h => new Date(h.date).toDateString() === todayStr);
+  let entry;
+  if (entryIdx >= 0) {
+    entry = S.history[entryIdx];
+  } else {
+    entry = { date: new Date().toISOString() };
+    S.history.push(entry);
+  }
+  wk.order.forEach(ex => {
+    const amrap = wk.actual[ex][4];
+    entry[ex] = { sets: [...wk.actual[ex]], amrap, TM: S[ex].TM, M: S[ex].M };
+    Object.assign(S[ex], progressSets(S[ex], amrap));
+  });
   save();
-  renderResult(pu_e, sq_e, false);
+  if (entry.pu && entry.sq) {
+    renderResult(entry.pu, entry.sq, false);
+  } else {
+    const ex = wk.order[0];
+    renderSingleExResult(ex, entry[ex]);
+  }
+}
+
+function logCurrentExOnly() {
+  clearWkTimer();
+  clearSavedWk();
+  const ex    = wk.order[wk.exIdx];
+  const amrap = wk.actual[ex][4];
+  const ex_e  = { sets: [...wk.actual[ex]], amrap, TM: S[ex].TM, M: S[ex].M };
+  const todayStr = todayS();
+  let entryIdx = S.history.findIndex(h => new Date(h.date).toDateString() === todayStr);
+  if (entryIdx >= 0) {
+    S.history[entryIdx][ex] = ex_e;
+  } else {
+    const newEntry = { date: new Date().toISOString() };
+    newEntry[ex] = ex_e;
+    S.history.push(newEntry);
+  }
+  Object.assign(S[ex], progressSets(S[ex], amrap));
+  save();
+  renderSingleExResult(ex, ex_e);
 }
 
 // ── Render dispatcher ──
@@ -882,11 +932,33 @@ function renderWkPhase() {
 
 // ── Phase: Select exercise ──
 function renderWkSelect(page) {
+  const entry      = todayEntry();
+  const puDoneToday = !!(entry && entry.pu !== undefined);
+  const sqDoneToday = !!(entry && entry.sq !== undefined);
+
   function setsMini(ex, color) {
     return S[ex].sets.map((r,i) =>
       i===4 ? `<span style="color:${color};font-weight:800">${r}*</span>` : r
     ).join(' · ');
   }
+
+  const partialNote = (puDoneToday || sqDoneToday) ? `
+    <div style="font-size:10px;margin-bottom:12px;display:flex;gap:12px">
+      ${puDoneToday ? '<span style="color:var(--orange);font-weight:700">Push-ups ✓ logged</span>' : ''}
+      ${sqDoneToday ? '<span style="color:var(--blue);font-weight:700">Squats ✓ logged</span>' : ''}
+    </div>` : '';
+
+  const puBtn = puDoneToday ? '' : `
+    <button class="ex-select-btn" style="border-color:var(--orange)33" onclick="startWorkout('pu')">
+      <div class="ex-select-name" style="color:var(--orange)">PUSH-UPS</div>
+      <div class="ex-select-sets">${setsMini('pu','var(--orange)')}</div>
+    </button>`;
+  const sqBtn = sqDoneToday ? '' : `
+    <button class="ex-select-btn" style="border-color:var(--blue)33" onclick="startWorkout('sq')">
+      <div class="ex-select-name" style="color:var(--blue)">SQUATS</div>
+      <div class="ex-select-sets">${setsMini('sq','var(--blue)')}</div>
+    </button>`;
+
   page.innerHTML = `
     <div class="app-header">
       <div class="app-header-top">
@@ -895,15 +967,9 @@ function renderWkSelect(page) {
       </div>
       <div style="font-size:10px;color:var(--muted)">// choose first exercise</div>
     </div>
-
-    <button class="ex-select-btn" style="border-color:var(--orange)33" onclick="startWorkout('pu')">
-      <div class="ex-select-name" style="color:var(--orange)">PUSH-UPS</div>
-      <div class="ex-select-sets">${setsMini('pu','var(--orange)')}</div>
-    </button>
-    <button class="ex-select-btn" style="border-color:var(--blue)33" onclick="startWorkout('sq')">
-      <div class="ex-select-name" style="color:var(--blue)">SQUATS</div>
-      <div class="ex-select-sets">${setsMini('sq','var(--blue)')}</div>
-    </button>
+    ${partialNote}
+    ${puBtn}
+    ${sqBtn}
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">
       * = AMRAP (set 5) · the other exercise follows automatically
     </div>
@@ -1010,8 +1076,9 @@ function renderWkExDone(page) {
   const actionBtn = isLast
     ? `<button class="btn btn-primary" onclick="finishWorkout()">[ ✓ FINISH WORKOUT ]</button>`
     : `<button class="btn btn-primary"
-        style="background:${nextColor};border-color:${nextColor}"
-        onclick="continueToNextEx()">[ ▶ START ${nextName} ]</button>`;
+        style="background:${nextColor};border-color:${nextColor};margin-bottom:8px"
+        onclick="continueToNextEx()">[ ▶ START ${nextName} ]</button>
+       <button class="btn btn-ghost" onclick="logCurrentExOnly()">[ ✓ LOG ${exName.toUpperCase()} ONLY ]</button>`;
 
   page.innerHTML = `
     <div class="app-header">
@@ -1033,9 +1100,12 @@ function renderWkExDone(page) {
 // RENDER — WORKOUT (entry point)
 // ══════════════════════════════════════════════
 function renderWorkout() {
-  if (loggedToday()) {
-    const last = S.history[S.history.length - 1];
-    renderResult(last.pu, last.sq, true);
+  const entry = todayEntry();
+  const puDoneToday = !!(entry && entry.pu !== undefined);
+  const sqDoneToday = !!(entry && entry.sq !== undefined);
+
+  if (puDoneToday && sqDoneToday) {
+    renderResult(entry.pu, entry.sq, true);
     return;
   }
   clearWkTimer();
@@ -1124,6 +1194,63 @@ function renderResult(pu, sq, readonly) {
   `;
 }
 
+// ── Single-exercise result (one ex logged, other still available) ──
+function renderSingleExResult(ex, exData) {
+  const exName    = ex === 'pu' ? 'Push-ups' : 'Squats';
+  const otherEx   = ex === 'pu' ? 'sq' : 'pu';
+  const otherName = otherEx === 'pu' ? 'PUSH-UPS' : 'SQUATS';
+  const color      = ex === 'pu' ? 'var(--orange)' : 'var(--blue)';
+  const otherColor = otherEx === 'pu' ? 'var(--orange)' : 'var(--blue)';
+  const amrap      = exData.amrap;
+
+  function pillsHTML(sets, c) {
+    return sets.map((r,i) => {
+      const isA = i===4;
+      return `<div class="ns-pill ${isA?'amrap':''}" style="${isA?'':'border-color:'+c+'33'}">${r}${isA?'*':''}</div>`;
+    }).join('');
+  }
+  function progressHTML(a) {
+    if (a <= 30) return `<span style="color:var(--muted)">no change</span>`;
+    if (a <= 34) return `<span style="color:var(--green)">+2 all sets</span>`;
+    if (a <= 38) return `<span style="color:var(--green)">+3 all sets</span>`;
+    return `<span style="color:var(--orange)">+5 all sets</span>`;
+  }
+
+  document.getElementById('pg-workout').innerHTML = `
+    <div class="app-header">
+      <div class="app-header-top">
+        <div class="app-name" style="color:${color}">${exName.toUpperCase()} ✓</div>
+        <div class="app-meta">// logged</div>
+      </div>
+    </div>
+
+    <div class="section-head">AMRAP result</div>
+    <div class="result-block" style="margin-bottom:14px">
+      <div class="result-row">
+        <div class="rr-label" style="color:${color}">${exName.toLowerCase()} set 5</div>
+        <div class="rr-actual" style="color:${color}">${amrap}</div>
+        <div class="rr-diff d-zero">${progressHTML(amrap)}</div>
+      </div>
+    </div>
+
+    <div class="section-head">next ${exName.toLowerCase()} session</div>
+    <div class="next-block" style="margin-bottom:20px">
+      <div class="next-label">&gt; updated sets</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">${exName.toLowerCase()} · TM ${S[ex].TM}</div>
+      <div class="next-sets-row">${pillsHTML(S[ex].sets, color)}</div>
+    </div>
+
+    <div style="border:1px solid var(--b1);padding:12px 16px;margin-bottom:14px;font-size:10px;line-height:1.8">
+      <span style="color:${color};font-weight:700">${exName} ✓</span> logged today<br>
+      <span style="color:${otherColor};font-weight:700">${otherName}</span> <span style="color:var(--muted)">still remaining — complete for streak</span>
+    </div>
+
+    <button class="btn btn-primary" style="background:${otherColor};border-color:${otherColor};margin-bottom:8px"
+      onclick="nav('workout')">[ ▶ DO ${otherName} NOW ]</button>
+    <button class="btn btn-ghost" onclick="nav('home')">[ ← HOME ]</button>
+  `;
+}
+
 // ══════════════════════════════════════════════
 // RENDER — HOME
 // ══════════════════════════════════════════════
@@ -1134,20 +1261,44 @@ function renderHome() {
   const thisWk = worksThisWeek();
   const goal   = S.settings.worksPerWeek || 3;
 
-  const wkDots = days.map(d => `
-    <div class="mwg-cell">
-      <div class="mwg-dot ${d.hit?'hit':''} ${d.isToday&&!d.hit?'today':''}">${d.hit?'✓':''}</div>
-      <div class="mwg-day">${d.label}</div>
-    </div>`).join('');
+  const wkDots = days.map(d => {
+    const puMark = d.puDone
+      ? `<span style="color:${d.bothDone?'#000':'var(--orange)'}">✓</span>`
+      : `<span style="color:var(--b2)">·</span>`;
+    const sqMark = d.sqDone
+      ? `<span style="color:${d.bothDone?'#000':'var(--blue)'}">✓</span>`
+      : `<span style="color:var(--b2)">·</span>`;
+    return `
+      <div class="mwg-cell">
+        <div class="mwg-dot ${d.bothDone?'hit':''} ${d.isToday&&!d.bothDone?'today':''}" style="gap:3px">
+          ${puMark}${sqMark}
+        </div>
+        <div class="mwg-day">${d.label}</div>
+      </div>`;
+  }).join('');
 
   const weekBar = Array.from({length: goal}, (_, i) =>
     `<div style="flex:1;height:6px;background:${i < thisWk ? 'var(--orange)' : 'var(--b2)'};margin:0 2px"></div>`
   ).join('');
 
+  const todayEnt    = todayEntry();
+  const puDoneToday = !!(todayEnt && todayEnt.pu !== undefined);
+  const sqDoneToday = !!(todayEnt && todayEnt.sq !== undefined);
+
   let dayBadge = '';
-  if (logged)           dayBadge = `<div class="logged-flag">&nbsp;logged today</div>`;
-  else if (thisWk >= goal) dayBadge = `<div class="logged-flag">&nbsp;weekly goal met</div>`;
-  else                  dayBadge = `<div class="workout-day-badge">${thisWk}/${goal} workouts this week</div>`;
+  if (logged) {
+    dayBadge = `<div class="logged-flag">&nbsp;both logged today</div>`;
+  } else if (puDoneToday || sqDoneToday) {
+    const doneColor = puDoneToday ? 'var(--orange)' : 'var(--blue)';
+    const pendColor = puDoneToday ? 'var(--blue)' : 'var(--orange)';
+    const doneName  = puDoneToday ? 'push-ups' : 'squats';
+    const pendName  = puDoneToday ? 'squats' : 'push-ups';
+    dayBadge = `<div class="workout-day-badge"><span style="color:${doneColor}">${doneName} ✓</span> · <span style="color:${pendColor}">${pendName} pending</span></div>`;
+  } else if (thisWk >= goal) {
+    dayBadge = `<div class="logged-flag">&nbsp;weekly goal met</div>`;
+  } else {
+    dayBadge = `<div class="workout-day-badge">${thisWk}/${goal} workouts this week</div>`;
+  }
 
   function setsMini(exData, color) {
     return exData.sets.map((r,i) =>
@@ -1206,7 +1357,7 @@ function renderHome() {
       </div>
 
       <button class="btn btn-primary" onclick="nav('workout')">
-        [ ${logged ? 'VIEW TODAY\'S LOG' : '▶ START WORKOUT'} ]
+        [ ${logged ? 'VIEW TODAY\'S LOG' : (puDoneToday || sqDoneToday) ? '▶ CONTINUE WORKOUT' : '▶ START WORKOUT'} ]
       </button>
     `;
   } catch(e) {
@@ -1287,12 +1438,14 @@ function renderProgress() {
     return h[ex].actual || 0;
   }
 
-  const puBest = Math.max(...S.history.map(h => getAmrap(h,'pu')));
-  const sqBest = Math.max(...S.history.map(h => getAmrap(h,'sq')));
-  const puAvg  = Math.round(S.history.reduce((a,h) => a+getAmrap(h,'pu'),0) / S.history.length);
-  const sqAvg  = Math.round(S.history.reduce((a,h) => a+getAmrap(h,'sq'),0) / S.history.length);
-  const puData = S.history.map(h => ({ date:h.date, actual:getAmrap(h,'pu'), target:h.pu.TM||(h.pu.M||30) }));
-  const sqData = S.history.map(h => ({ date:h.date, actual:getAmrap(h,'sq'), target:h.sq.TM||(h.sq.M||40) }));
+  const puHistory = S.history.filter(h => h.pu !== undefined);
+  const sqHistory = S.history.filter(h => h.sq !== undefined);
+  const puBest = puHistory.length ? Math.max(...puHistory.map(h => getAmrap(h,'pu'))) : 0;
+  const sqBest = sqHistory.length ? Math.max(...sqHistory.map(h => getAmrap(h,'sq'))) : 0;
+  const puAvg  = puHistory.length ? Math.round(puHistory.reduce((a,h) => a+getAmrap(h,'pu'),0) / puHistory.length) : 0;
+  const sqAvg  = sqHistory.length ? Math.round(sqHistory.reduce((a,h) => a+getAmrap(h,'sq'),0) / sqHistory.length) : 0;
+  const puData = puHistory.map(h => ({ date:h.date, actual:getAmrap(h,'pu'), target:h.pu.TM||(h.pu.M||30) }));
+  const sqData = sqHistory.map(h => ({ date:h.date, actual:getAmrap(h,'sq'), target:h.sq.TM||(h.sq.M||40) }));
 
   el.innerHTML = `
     <div class="app-header">
