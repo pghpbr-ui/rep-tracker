@@ -15,17 +15,30 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:     #0D0D0D;
-      --s1:     #111111;
-      --s2:     #161616;
-      --b1:     #1C1C1C;
-      --b2:     #282828;
-      --text:   #D7D9DB;
-      --muted:  #505050;
-      --orange: #CE202E;
-      --blue:   #7B8FD8;
-      --green:  #4ADE80;
-      --red:    #CE202E;
+      /* base — deep navy-black */
+      --bg:       #0B0B14;
+      --s1:       #10101E;
+      --s2:       #15152A;
+      --b1:       #1E1E34;
+      --b2:       #28284A;
+      --text:     #DDD8F5;
+      --muted:    #4A4A6A;
+
+      /* red family (push-ups) */
+      --orange:   #CE202E;
+      --red:      #CE202E;
+      --red-hi:   #E85060;
+      --red-dim:  #6E0015;
+      --red-bg:   #110208;
+
+      /* blue family (squats) */
+      --blue:     #6B88E8;
+      --blue-hi:  #90A8F5;
+      --blue-dim: #1C2E95;
+      --blue-bg:  #04091E;
+
+      /* status */
+      --green:    #4ADE80;
       --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', ui-monospace, monospace;
     }
 
@@ -68,7 +81,7 @@
       content: ''; position: absolute; top: 0; left: 16px; right: 16px;
       height: 2px; background: transparent; transition: background .15s;
     }
-    .nb.on { color: var(--orange); }
+    .nb.on { color: var(--orange); background: rgba(206,32,46,0.07); }
     .nb.on::before { background: var(--orange); }
     .nb svg { width: 18px; height: 18px; }
 
@@ -113,9 +126,10 @@
     /* ── COMMON ── */
     .divider { height: 1px; background: var(--b1); margin: 16px 0; }
     .section-head {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--b1); padding-bottom: 8px;
     }
     .section-head::before { content: '>'; color: var(--orange); font-weight: 800; }
 
@@ -129,10 +143,10 @@
       -webkit-tap-highlight-color: transparent;
     }
     .btn:active { transform: scale(0.98); }
-    .btn-primary { background: var(--orange); border-color: var(--orange); color: #000; }
+    .btn-primary { background: var(--orange); border-color: var(--red-dim); color: #fff; }
     .btn-ghost   { border-color: var(--b2); color: var(--muted); }
-    .btn-ghost:active { color: var(--text); }
-    .btn-red { background: var(--red); border-color: var(--red); color: #000; font-weight: 800; }
+    .btn-ghost:active { color: var(--text); border-color: var(--muted); }
+    .btn-red { background: var(--red-dim); border-color: var(--red); color: var(--red-hi); font-weight: 800; }
 
     /* ── HOME ── */
     .app-header { padding-top: 8px; margin-bottom: 24px; }
@@ -157,7 +171,7 @@
       font-size: 9px; color: var(--muted); font-weight: 700;
       transition: all .2s;
     }
-    .mwg-dot.hit   { background: var(--orange); border-color: var(--orange); color: #000; }
+    .mwg-dot.hit   { background: var(--red-dim); border-color: var(--orange); }
     .mwg-dot.today { border-color: var(--muted); }
 
     /* ── TARGET GRID ── */
@@ -188,13 +202,13 @@
 
     /* ── WORKOUT — ACTIVE SET ── */
     .set-progress { display: flex; gap: 4px; margin-bottom: 28px; }
-    .sp-seg { flex: 1; height: 3px; background: var(--b2); transition: background .3s; }
-    .sp-seg.done    { background: var(--muted); }
+    .sp-seg { flex: 1; height: 4px; border-radius: 2px; background: var(--b2); transition: background .3s; }
+    .sp-seg.done    { background: var(--b2); opacity: 0.9; }
     .sp-seg.current { background: var(--orange); }
 
     .active-set-card {
-      border: 1px solid var(--b1); padding: 36px 24px 28px;
-      text-align: center; margin-bottom: 16px;
+      border: 1px solid var(--b2); padding: 36px 24px 28px;
+      text-align: center; margin-bottom: 16px; background: var(--s1);
     }
     .active-set-num {
       font-size: 100px; font-weight: 800; letter-spacing: -5px;
@@ -236,8 +250,8 @@
 
     /* ── WORKOUT — EX COMPLETE ── */
     .ex-done-card {
-      border: 1px solid var(--b1); padding: 44px 24px 36px;
-      text-align: center; margin-bottom: 20px;
+      border: 1px solid var(--b2); padding: 44px 24px 36px;
+      text-align: center; margin-bottom: 20px; background: var(--s1);
     }
     .ex-done-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 10px; }
     .ex-done-num { font-size: 96px; font-weight: 800; letter-spacing: -5px; line-height: 1; margin-bottom: 8px; }
@@ -261,22 +275,22 @@
     .ns-pill.amrap { border-color: var(--orange); color: var(--orange); }
 
     /* ── CHARTS ── */
-    .chart-block { border: 1px solid var(--b1); padding: 16px 14px; margin-bottom: 10px; }
+    .chart-block { border: 1px solid var(--b1); padding: 16px 14px; margin-bottom: 10px; background: var(--s1); }
     .chart-legend { display: flex; gap: 14px; margin-bottom: 10px; }
     .leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
     .leg-line { width: 12px; height: 2px; }
     .leg-dash { width: 12px; height: 0; border-top: 2px dashed var(--b2); }
 
     /* ── FORMULA / PROGRAM STATE ── */
-    .formula-block { border: 1px solid var(--b1); margin-bottom: 10px; overflow: hidden; }
-    .formula-head { background: var(--s1); padding: 10px 14px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--orange); border-bottom: 1px solid var(--b1); }
-    .formula-row { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--b1); font-size: 11px; }
+    .formula-block { border: 1px solid var(--b1); border-left: 3px solid var(--b2); margin-bottom: 10px; overflow: hidden; }
+    .formula-head { background: var(--s2); padding: 10px 14px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--orange); border-bottom: 1px solid var(--b1); }
+    .formula-row { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--b1); font-size: 11px; background: var(--s1); }
     .formula-row:last-child { border-bottom: none; }
     .fr-key { color: var(--muted); flex: 1; }
     .fr-val { font-weight: 700; font-size: 14px; }
 
     /* ── SETTINGS ── */
-    .settings-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--b1); font-size: 11px; }
+    .settings-row { display: flex; align-items: center; padding: 12px 14px; border-bottom: var(--b1) 1px solid; font-size: 11px; background: var(--s1); }
     .settings-row:last-child { border-bottom: none; }
     .sr-key { color: var(--muted); flex: 1; }
     .sr-input {
@@ -308,8 +322,8 @@
       backdrop-filter: blur(2px);
     }
     .modal-ov.hidden { display: none; }
-    .modal-inner { background: var(--s1); border: 1px solid var(--b2); padding: 24px; width: 100%; max-width: 340px; }
-    .modal-head { font-size: 13px; font-weight: 800; color: var(--red); letter-spacing: 0.06em; margin-bottom: 16px; }
+    .modal-inner { background: var(--s1); border: 1px solid var(--b2); border-left: 4px solid var(--red-dim); padding: 24px; width: 100%; max-width: 340px; }
+    .modal-head { font-size: 13px; font-weight: 800; color: var(--red-hi); letter-spacing: 0.06em; margin-bottom: 16px; }
     .modal-body { font-size: 11px; color: var(--muted); line-height: 2; border-left: 2px solid var(--b2); padding-left: 12px; margin-bottom: 22px; }
     .modal-body strong { color: var(--text); }
 
@@ -327,8 +341,8 @@
     .save-toast.show { opacity: 1; animation: fadeUp .25s ease; }
 
     /* ── DATA SECTION ── */
-    .data-block { border: 1px solid var(--b1); margin-bottom: 10px; overflow: hidden; }
-    .data-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--b1); font-size: 11px; }
+    .data-block { border: 1px solid var(--b1); border-left: 3px solid var(--b2); margin-bottom: 10px; overflow: hidden; }
+    .data-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--b1); font-size: 11px; background: var(--s1); }
     .data-row:last-child { border-bottom: none; }
     .data-key { color: var(--muted); }
     .data-val { font-weight: 700; }
@@ -439,7 +453,7 @@
 <script>
 'use strict';
 
-const APP_VERSION = '20260424';
+const APP_VERSION = '20260424b';
 
 // ══════════════════════════════════════════════
 // STATE
@@ -954,13 +968,13 @@ function renderWkSelect(page) {
     </div>` : '';
 
   const puBtn = puDoneToday ? '' : `
-    <button class="ex-select-btn" style="border-color:var(--orange)33" onclick="startWorkout('pu')">
-      <div class="ex-select-name" style="color:var(--orange)">PUSH-UPS</div>
+    <button class="ex-select-btn" style="background:var(--red-bg);border-color:var(--red-dim)" onclick="startWorkout('pu')">
+      <div class="ex-select-name" style="color:var(--red-hi)">PUSH-UPS</div>
       <div class="ex-select-sets">${setsMini('pu','var(--orange)')}</div>
     </button>`;
   const sqBtn = sqDoneToday ? '' : `
-    <button class="ex-select-btn" style="border-color:var(--blue)33" onclick="startWorkout('sq')">
-      <div class="ex-select-name" style="color:var(--blue)">SQUATS</div>
+    <button class="ex-select-btn" style="background:var(--blue-bg);border-color:var(--blue-dim)" onclick="startWorkout('sq')">
+      <div class="ex-select-name" style="color:var(--blue-hi)">SQUATS</div>
       <div class="ex-select-sets">${setsMini('sq','var(--blue)')}</div>
     </button>`;
 
@@ -1028,7 +1042,7 @@ function renderWkActive(page) {
       </div>
     </div>
     <div class="set-progress">${segs}</div>
-    <div class="active-set-card">${bodyHTML}</div>
+    <div class="active-set-card" style="background:${ex==='pu'?'var(--red-bg)':'var(--blue-bg)'};border-color:${ex==='pu'?'var(--red-dim)':'var(--blue-dim)'}">${bodyHTML}</div>
     <div class="set-next-hint">${nextHint}</div>
   `;
 }
@@ -1092,7 +1106,7 @@ function renderWkExDone(page) {
         <div class="app-meta">all 9 sets complete</div>
       </div>
     </div>
-    <div class="ex-done-card">
+    <div class="ex-done-card" style="background:${ex==='pu'?'var(--red-bg)':'var(--blue-bg)'};border-color:${ex==='pu'?'var(--red-dim)':'var(--blue-dim)'}">
       <div class="ex-done-label">AMRAP result</div>
       <div class="ex-done-num" style="color:${color}">${amrap}</div>
       <div class="ex-done-sub">${progressText(amrap)}</div>
@@ -1171,24 +1185,23 @@ function renderResult(pu, sq, readonly) {
 
     <div class="section-head">AMRAP results</div>
     <div class="result-block" style="margin-bottom:14px">
-      <div class="result-row">
-        <div class="rr-label" style="color:var(--orange)">push-up set 5</div>
+      <div class="result-row" style="border-left:3px solid var(--red-dim)">
+        <div class="rr-label" style="color:var(--red-hi)">push-up set 4</div>
         <div class="rr-actual" style="color:var(--orange)">${puAmrap}</div>
         <div class="rr-diff d-zero">${progressHTML(puAmrap)}</div>
       </div>
-      <div class="result-row">
-        <div class="rr-label" style="color:var(--blue)">squat set 5</div>
+      <div class="result-row" style="border-left:3px solid var(--blue-dim)">
+        <div class="rr-label" style="color:var(--blue-hi)">squat set 4</div>
         <div class="rr-actual" style="color:var(--blue)">${sqAmrap}</div>
         <div class="rr-diff d-zero">${progressHTML(sqAmrap)}</div>
       </div>
     </div>
 
     <div class="section-head">next session</div>
-    <div class="next-block">
-      <div class="next-label">&gt; updated sets</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">push-ups · TM ${S.pu.TM}</div>
-      <div class="next-sets-row" style="margin-bottom:12px">${pillsHTML(S.pu.sets,'var(--orange)')}</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">squats · TM ${S.sq.TM}</div>
+    <div class="next-block" style="border-left:3px solid var(--red-dim)">
+      <div class="next-label">&gt; push-ups · TM ${S.pu.TM}</div>
+      <div class="next-sets-row" style="margin-bottom:14px">${pillsHTML(S.pu.sets,'var(--orange)')}</div>
+      <div class="next-label" style="color:var(--blue)">&gt; squats · TM ${S.sq.TM}</div>
       <div class="next-sets-row">${pillsHTML(S.sq.sets,'var(--blue)')}</div>
     </div>
 
@@ -1230,16 +1243,16 @@ function renderSingleExResult(ex, exData) {
     </div>
 
     <div class="section-head">AMRAP result</div>
-    <div class="result-block" style="margin-bottom:14px">
+    <div class="result-block" style="margin-bottom:14px;border-left:3px solid ${ex==='pu'?'var(--red-dim)':'var(--blue-dim)'}">
       <div class="result-row">
-        <div class="rr-label" style="color:${color}">${exName.toLowerCase()} set 5</div>
+        <div class="rr-label" style="color:${color}">${exName.toLowerCase()} set 4</div>
         <div class="rr-actual" style="color:${color}">${amrap}</div>
         <div class="rr-diff d-zero">${progressHTML(amrap)}</div>
       </div>
     </div>
 
     <div class="section-head">next ${exName.toLowerCase()} session</div>
-    <div class="next-block" style="margin-bottom:20px">
+    <div class="next-block" style="margin-bottom:20px;border-left:3px solid ${ex==='pu'?'var(--red-dim)':'var(--blue-dim)'}">
       <div class="next-label">&gt; updated sets</div>
       <div style="font-size:10px;color:var(--muted);margin-bottom:6px">${exName.toLowerCase()} · TM ${S[ex].TM}</div>
       <div class="next-sets-row">${pillsHTML(S[ex].sets, color)}</div>
@@ -1268,10 +1281,10 @@ function renderHome() {
 
   const wkDots = days.map(d => {
     const puMark = d.puDone
-      ? `<span style="color:${d.bothDone?'#000':'var(--orange)'}">✓</span>`
+      ? `<span style="color:${d.bothDone?'var(--red-hi)':'var(--orange)'}">✓</span>`
       : `<span style="color:var(--b2)">·</span>`;
     const sqMark = d.sqDone
-      ? `<span style="color:${d.bothDone?'#000':'var(--blue)'}">✓</span>`
+      ? `<span style="color:${d.bothDone?'var(--blue-hi)':'var(--blue)'}">✓</span>`
       : `<span style="color:var(--b2)">·</span>`;
     return `
       <div class="mwg-cell">
@@ -1330,11 +1343,11 @@ function renderHome() {
           <div class="stat-num" style="color:var(--orange)">${thisWk}<span style="font-size:14px;font-weight:600">/${goal}</span></div>
           <div class="stat-key">this week</div>
         </div>
-        <div class="stat-cell">
+        <div class="stat-cell" style="background:var(--red-bg);border-left:2px solid var(--red-dim)">
           <div class="stat-num" style="color:var(--orange)">${S.pu.TM}</div>
           <div class="stat-key">push TM</div>
         </div>
-        <div class="stat-cell">
+        <div class="stat-cell" style="background:var(--blue-bg);border-left:2px solid var(--blue-dim)">
           <div class="stat-num" style="color:var(--blue)">${S.sq.TM}</div>
           <div class="stat-key">squat TM</div>
         </div>
@@ -1347,14 +1360,14 @@ function renderHome() {
       <div class="section-head">next session</div>
       ${dayBadge}
       <div class="target-grid" style="margin-bottom:20px">
-        <div class="target-cell">
-          <div class="tc-label" style="color:var(--orange)">Push-ups</div>
+        <div class="target-cell" style="background:var(--red-bg);border-left:3px solid var(--red-dim)">
+          <div class="tc-label" style="color:var(--red-hi)">Push-ups</div>
           <div class="tc-num" style="color:var(--orange)">${S.pu.sets[3]}<span style="font-size:18px;font-weight:600">*</span></div>
           <div class="tc-sub">AMRAP target · TM ${S.pu.TM}</div>
           <div class="tc-sets-mini">${setsMini(S.pu,'var(--orange)')}</div>
         </div>
-        <div class="target-cell">
-          <div class="tc-label" style="color:var(--blue)">Squats</div>
+        <div class="target-cell" style="background:var(--blue-bg);border-left:3px solid var(--blue-dim)">
+          <div class="tc-label" style="color:var(--blue-hi)">Squats</div>
           <div class="tc-num" style="color:var(--blue)">${S.sq.sets[3]}<span style="font-size:18px;font-weight:600">*</span></div>
           <div class="tc-sub">AMRAP target · TM ${S.sq.TM}</div>
           <div class="tc-sets-mini">${setsMini(S.sq,'var(--blue)')}</div>
@@ -1504,10 +1517,10 @@ function renderProgress() {
 
     <div class="section-head">stats</div>
     <div class="prog-stats" style="margin-bottom:16px">
-      <div class="ps-cell"><div class="ps-val" style="color:var(--orange)">${puBest}</div><div class="ps-key">best push AMRAP</div></div>
-      <div class="ps-cell"><div class="ps-val" style="color:var(--blue)">${sqBest}</div><div class="ps-key">best squat AMRAP</div></div>
-      <div class="ps-cell"><div class="ps-val" style="color:var(--orange)">${puAvg}</div><div class="ps-key">avg push AMRAP</div></div>
-      <div class="ps-cell"><div class="ps-val" style="color:var(--blue)">${sqAvg}</div><div class="ps-key">avg squat AMRAP</div></div>
+      <div class="ps-cell" style="background:var(--red-bg);border-left:3px solid var(--red-dim)"><div class="ps-val" style="color:var(--orange)">${puBest}</div><div class="ps-key">best push AMRAP</div></div>
+      <div class="ps-cell" style="background:var(--blue-bg);border-left:3px solid var(--blue-dim)"><div class="ps-val" style="color:var(--blue)">${sqBest}</div><div class="ps-key">best squat AMRAP</div></div>
+      <div class="ps-cell" style="background:var(--red-bg);border-left:3px solid var(--red-dim)"><div class="ps-val" style="color:var(--orange)">${puAvg}</div><div class="ps-key">avg push AMRAP</div></div>
+      <div class="ps-cell" style="background:var(--blue-bg);border-left:3px solid var(--blue-dim)"><div class="ps-val" style="color:var(--blue)">${sqAvg}</div><div class="ps-key">avg squat AMRAP</div></div>
     </div>
 
     <div class="section-head">push-up AMRAP graph</div>
